@@ -176,7 +176,10 @@ impl Ui {
             let progress = |f: f32, t: &str| post(h, Work::Progress(f, t.to_string()));
             let r = match &release {
                 Some(r) => setup::install_release(&log, r, &c, &progress).map(|_| format!("BatteryHub v{} is installed.", r.version)),
-                None => setup::install(&ed, payload, &log, &st, &c, &progress).map(|_| format!("BatteryHub {} is installed.", inst::version_label())),
+                None => setup::install(&ed, payload, &log, &st, &c, &progress).map(|_| match setup::plan(&st) {
+                    Plan::Update(old) => format!("BatteryHub was updated from v{old} to {}.", inst::version_label()),
+                    _ => format!("BatteryHub {} is installed.", inst::version_label()),
+                }),
             };
             post(h, Work::Finished(r));
         });
@@ -859,14 +862,14 @@ pub fn run(ed: Edition, payload: &'static [u8], o: &Opts) -> i32 {
             started: std::time::Instant::now(),
         };
         UI.with(|c| *c.borrow_mut() = Some(ui));
-        // Started with an action (from Settings > Apps, or by the program's own updater): go
-        // straight to it.
+        // Started with an action (from Settings > Apps, or by the program's own updater), or over
+        // an older version: go straight to it.
         with(|u| match o.action {
             Some(setup::Action::Uninstall) if u.st.installed => {
                 u.page = Page::Uninstall;
             }
-            Some(setup::Action::Install | setup::Action::Update) => u.start_install(None),
             _ if o.versions => u.load_releases(),
+            a if setup::plan(&u.st).starts_by_itself(a) => u.start_install(None),
             _ => {}
         });
         let _ = ShowWindow(hwnd, SW_SHOW);

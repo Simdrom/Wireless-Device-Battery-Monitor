@@ -3,6 +3,9 @@
 //! (window.rs) and silent mode (/S) both drive it; every file and registry entry it creates or
 //! removes is logged with its full path (%TEMP%\BatteryHub-Setup.log).
 //!
+//! Started without an action it works as installer or updater: an older installation is updated
+//! right away (stop, replace, start again), anything else is offered in the window.
+//!
 //! Command line: /install | /update | /uninstall, /S (silent), /autostart=yes|no,
 //! /desktop=yes|no, /nolaunch, /nonotify (no "Update finished" message from the updated program),
 //! /purge (uninstall: also remove settings and battery history), /versions (open the version list).
@@ -115,6 +118,25 @@ pub fn plan_for(installed: bool, version: Option<&str>, this: &str) -> Plan {
             std::cmp::Ordering::Equal => Plan::Reinstall,
             std::cmp::Ordering::Greater => Plan::Downgrade(v.to_string()),
         },
+    }
+}
+
+impl Plan {
+    /// Started without an action, the setup updates an older installation right away; "/install"
+    /// and "/update" always start, but "/update" never goes back to an older version. Everything
+    /// else (first install, reinstall, going back) waits for the user's click.
+    pub fn starts_by_itself(&self, action: Option<Action>) -> bool {
+        match action {
+            Some(Action::Install) => true,
+            Some(Action::Update) => !matches!(self, Plan::Downgrade(_)),
+            Some(Action::Uninstall) => false,
+            None => matches!(self, Plan::Update(_)),
+        }
+    }
+
+    /// Silent mode: only an explicit "/install" replaces a newer version by this older one.
+    pub fn skipped_silently(&self, action: Option<Action>) -> bool {
+        matches!(self, Plan::Downgrade(_)) && action != Some(Action::Install)
     }
 }
 
@@ -306,7 +328,6 @@ pub fn launch(ed: &Edition, log: &Log, exe: &Path) {
 /// Installs the program in this setup. Settings, names, warning levels and the battery history
 /// are never touched (they live in the settings key and the data folder, not the program folder).
 pub fn install(ed: &Edition, payload: &[u8], log: &Log, st: &State, c: &Choices, progress: Progress) -> Result<Vec<String>, String> {
-    let mut created = Vec::new();
     let what = match plan(st) {
         Plan::Install => "Installing".to_string(),
         Plan::Update(v) => format!("Updating from v{v}"),
@@ -318,7 +339,33 @@ pub fn install(ed: &Edition, payload: &[u8], log: &Log, st: &State, c: &Choices,
     let dir = if st.installed { st.dir.clone() } else { ed.default_dir() };
     let exe = dir.join(ed.exe);
     let was_running = inst::stop_running(ed, &exe, log);
+    let done = write_install(ed, payload, log, st, c, progress);
+    if done.is_err() && was_running && exe.exists() {
+        // The old program file is still there (it is replaced in one step): run it again.
+        log.warn("Setup failed, starting BatteryHub again.");
+        launch(ed, log, &exe);
+    }
+    let created = done?;
 
+    if c.launch || was_running {
+        progress(0.97, "Starting BatteryHub");
+        // The updated program says "Update finished: vOLD -> vNEW" once when it starts.
+        if let (true, Some(old), Some(k)) = (c.notify, &st.version, inst::create(HKCU, ed.settings_key))
+            && old != inst::VERSION
+        {
+            k.set_string("UpdatedFrom", old);
+        }
+        launch(ed, log, &exe);
+    }
+    progress(1.0, "Done");
+    Ok(created)
+}
+
+/// The part of `install` between stopping and starting the program.
+fn write_install(ed: &Edition, payload: &[u8], log: &Log, st: &State, c: &Choices, progress: Progress) -> Result<Vec<String>, String> {
+    let mut created = Vec::new();
+    let dir = if st.installed { st.dir.clone() } else { ed.default_dir() };
+    let exe = dir.join(ed.exe);
     progress(0.12, "Preparing the install folder");
     if !dir.exists() {
         std::fs::create_dir_all(&dir).map_err(|e| format!("Cannot create {}: {e}", dir.display()))?;
@@ -344,17 +391,6 @@ pub fn install(ed: &Edition, payload: &[u8], log: &Log, st: &State, c: &Choices,
     progress(0.93, "Setting up autostart");
     set_autostart(ed, log, &exe, c.autostart, &mut created);
 
-    if c.launch || was_running {
-        progress(0.97, "Starting BatteryHub");
-        // The updated program says "Update finished: vOLD -> vNEW" once when it starts.
-        if let (true, Some(old), Some(k)) = (c.notify, &st.version, inst::create(HKCU, ed.settings_key))
-            && old != inst::VERSION
-        {
-            k.set_string("UpdatedFrom", old);
-        }
-        launch(ed, log, &exe);
-    }
-    progress(1.0, "Done");
     Ok(created)
 }
 
@@ -619,6 +655,10 @@ pub fn run_silent(ed: &Edition, payload: &[u8], o: &Opts) -> i32 {
         Some(Action::Uninstall) if !st.installed => Ok(Vec::new()),
         Some(Action::Uninstall) => uninstall(ed, &log, &st, o.purge, &none),
         Some(Action::Update) if !st.installed => Err("Nothing to update: not installed.".into()),
+        a if plan(&st).skipped_silently(a) => {
+            log.info(format!("v{} is installed and newer than this setup ({}): nothing to do.", st.version.as_deref().unwrap_or("?"), inst::VERSION));
+            Ok(Vec::new())
+        }
         _ => install(ed, payload, &log, &st, &c, &none),
     };
     match r {
@@ -660,6 +700,21 @@ mod tests {
         assert_eq!(plan_for(true, Some("1.7"), "1.6"), Plan::Downgrade("1.7".into()));
         assert_eq!(plan_for(true, Some("1.10"), "1.9"), Plan::Downgrade("1.10".into()));
         assert_eq!(plan_for(true, None, "1.6"), Plan::Reinstall);
+    }
+
+    #[test]
+    fn setup_updates_by_itself_but_never_goes_back() {
+        let (fresh, update, same, newer) = (Plan::Install, Plan::Update("1.6.3".into()), Plan::Reinstall, Plan::Downgrade("1.7".into()));
+        // Double-click: only an older installation is updated without a click.
+        assert!(update.starts_by_itself(None));
+        for p in [&fresh, &same, &newer] {
+            assert!(!p.starts_by_itself(None));
+        }
+        assert!(update.starts_by_itself(Some(Action::Update)) && !newer.starts_by_itself(Some(Action::Update)));
+        assert!(newer.starts_by_itself(Some(Action::Install)) && !update.starts_by_itself(Some(Action::Uninstall)));
+        // Silent: a newer version is only replaced with an explicit /install ("Other versions...").
+        assert!(newer.skipped_silently(None) && newer.skipped_silently(Some(Action::Update)));
+        assert!(!newer.skipped_silently(Some(Action::Install)) && !update.skipped_silently(None) && !fresh.skipped_silently(None));
     }
 
     #[test]
