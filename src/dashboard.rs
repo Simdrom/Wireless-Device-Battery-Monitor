@@ -66,6 +66,7 @@ pub fn encode_status(s: &DeviceStatus, reported: &str) -> String {
         (s.connected as u8).to_string(),
         s.millivolts.to_string(),
         hw,
+        s.dock_percent.map(|p| p.to_string()).unwrap_or_default(),
     ]
     .join(&SEP.to_string())
 }
@@ -100,6 +101,7 @@ pub fn decode_status(line: &str) -> Option<(DeviceStatus, String)> {
         connected: f[11] == "1",
         millivolts: f[12].parse().unwrap_or(0),
         hw,
+        dock_percent: f.get(14).and_then(|p| p.parse().ok()),
         ..Default::default()
     };
     Some((s, f[2].to_string()))
@@ -584,6 +586,9 @@ impl Dash {
         ];
         if !d.detail.is_empty() {
             rows.insert(2, ("Details", d.detail.clone()));
+        }
+        if let Some(dock) = d.dock_text() {
+            rows.insert(2, ("Dock battery", dock));
         }
         if d.millivolts > 0 {
             rows.insert(2, ("Battery voltage", format!("{} mV", d.millivolts)));

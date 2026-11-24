@@ -1342,7 +1342,7 @@ impl App {
         let h = self.history.points(&d.key);
         let last = self.history.latest(&d.key).map(|p| (p.t, p.level, p.flags));
         let text = format!(
-            "{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{:?}|{:?}|{}",
+            "{}|{}|{}|{}|{}|{}|{}|{}|{:?}|{}|{}|{:?}|{:?}|{}",
             d.key,
             d.name,
             d.percent,
@@ -1351,6 +1351,7 @@ impl App {
             d.full,
             d.asleep,
             d.via,
+            d.dock_percent,
             self.light,
             self.scale().to_bits(),
             last,
@@ -1453,6 +1454,11 @@ impl App {
         }
         let via = mask(&line, small_f, light);
         cv.draw(&via, pad, y, dim, 255);
+        // The spare battery in the headset's dock, when there is one.
+        if let Some(dock) = d.dock_text() {
+            y += px(20.0);
+            cv.draw(&mask(&format!("Dock battery: {dock}"), small_f, light), pad, y, dim, 255);
+        }
         y += px(30.0);
 
         // Last 24 hours (the history keeps 7 days; the dashboard shows all of it).

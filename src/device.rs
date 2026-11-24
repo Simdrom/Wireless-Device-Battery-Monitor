@@ -58,6 +58,8 @@ pub struct DeviceStatus {
     pub detail: String,
     /// Set when the device only reports coarse levels ("Low", "Full", ...).
     pub level_text: String,
+    /// Level of the spare battery in the device's charging dock; None = no dock, or it is empty.
+    pub dock_percent: Option<i32>,
     pub charging: bool,
     /// On power and fully charged.
     pub full: bool,
@@ -84,6 +86,7 @@ impl Default for DeviceStatus {
             percent: -1,
             detail: String::new(),
             level_text: String::new(),
+            dock_percent: None,
             charging: false,
             full: false,
             asleep: false,
@@ -139,6 +142,11 @@ impl DeviceStatus {
         } else {
             "?".into()
         }
+    }
+
+    /// State of the spare battery in the dock: "63%, charging" / "full".
+    pub fn dock_text(&self) -> Option<String> {
+        self.dock_percent.map(|p| if p >= 100 { "full".into() } else { format!("{p}%, charging") })
     }
 
     /// "32%, charging" / "100%, fully charged" / "32%, on battery" - for menus and tooltips.
