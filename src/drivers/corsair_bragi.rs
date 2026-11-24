@@ -1,4 +1,5 @@
-//! Corsair "Bragi" headset receivers: Virtuoso RGB Wireless (XT) and related models (VID 1B1C,
+//! Corsair "Bragi" headset receivers and Slipstream mice (VID 1B1C).
+//! Headsets include Virtuoso RGB Wireless (XT) and related models (VID 1B1C,
 //! receivers 0A64, 0A62, 0A3E, 0A3D, 0A97), the Void Wireless v2 receiver 2A08 (issue #168, listed
 //! by the original) and the HS80 RGB Wireless receiver 0A6B (#161; the original sends Bragi GETs to
 //! every Corsair FF42 64-byte collection, which covers it). The Void family's older protocol is in
@@ -15,6 +16,15 @@
 //!   PP 0F    battery level, 0..1000 (tenths of a percent)
 //!   PP 10    charge state: 1 charging, 3 full
 //!
+//! Slipstream receivers (2B00, 1BDC, 1BA6) and mice use the same GET in unnumbered 64-byte reports:
+//!
+//!   GET      TT 02 PP                   TT = 08 the USB device itself, 09 the mouse on channel 1
+//!   reply    SS 02 ST V0 V1             SS = TT - 08
+//!   PP 12    USB product id             2B22 = Scimitar Elite Wireless SE
+//!
+//! Verified on a Scimitar Elite Wireless SE on receiver 2B00 with iCUE running; the cable (2B22) is
+//! untested.
+//!
 //! GET is read-only; the receiver is never switched into software mode. Other reports (e.g. the
 //! receiver's own notifications) are skipped. A receiver whose headset does not answer is shown off.
 use crate::device::{DeviceKind, DeviceStatus, PollContext};
@@ -26,7 +36,10 @@ const RECEIVERS: [u16; 7] = [0x0A64, 0x0A62, 0x0A3E, 0x0A3D, 0x0A97, 0x2A08, 0x0
 const TARGET_HEADSET: u8 = 0x09;
 pub const PROP_BATTERY: u8 = 0x0F;
 pub const PROP_CHARGE: u8 = 0x10;
+const PROP_PRODUCT: u8 = 0x12;
 const REPLY_MS: u64 = 400;
+const SCIMITAR_PID: u16 = 0x2B22;
+const SLIPSTREAM_RECEIVERS: [u16; 3] = [0x2B00, 0x1BDC, 0x1BA6];
 
 pub fn request(target: u8, prop: u8) -> [u8; 4] {
     [0x02, target, 0x02, prop]
@@ -47,6 +60,71 @@ pub fn parse(r: &[u8], source: u8) -> Option<Option<u32>> {
 /// Level in percent from the 0..1000 battery value.
 pub fn percent(v: u32) -> Option<i32> {
     (v <= 1000).then(|| ((v + 5) / 10) as i32)
+}
+
+/// Frame for a Slipstream receiver / mouse; its reports are unnumbered, so the report id is 0.
+fn mouse_request(target: u8, prop: u8) -> [u8; 4] {
+    [0x00, target, 0x02, prop]
+}
+
+/// 16-bit value of a successful GET reply from `target` (report id 0 already stripped). The answer
+/// names the source as target - 08: 00 the USB device itself, 01 the mouse on channel 1.
+fn mouse_reply(r: &[u8], target: u8) -> Option<u32> {
+    (r.len() >= 5 && r[0] == target - 0x08 && r[1] == 0x02 && r[2] == 0).then(|| u16::from_le_bytes([r[3], r[4]]) as u32)
+}
+
+fn mouse_get_once(d: &HidDev, target: u8, prop: u8) -> Option<u32> {
+    d.flush();
+    if !d.write(&mouse_request(target, prop)) {
+        return None;
+    }
+    let end = Deadline::in_ms(REPLY_MS);
+    while !end.passed() {
+        if let Some(v) = d.read(end.left_ms()).and_then(|r| mouse_reply(&r, target)) {
+            return Some(v);
+        }
+    }
+    None
+}
+
+/// Replies do not name the property, so the answer to a GET sent by iCUE at the same moment looks
+/// like ours: a value only counts once two reads in a row agree.
+fn mouse_get(d: &HidDev, target: u8, prop: u8) -> Option<u32> {
+    agreed(|| mouse_get_once(d, target, prop))
+}
+
+fn agreed(mut read: impl FnMut() -> Option<u32>) -> Option<u32> {
+    let mut last = read()?;
+    for _ in 0..3 {
+        let v = read()?;
+        if v == last {
+            return Some(v);
+        }
+        last = v;
+    }
+    None
+}
+
+fn scimitar(c: &HidColl, target: u8, receiver: bool) -> Option<DeviceStatus> {
+    let d = HidDev::open(c)?;
+    // shortcut: only Slipstream channel 1 is queried; add channel discovery if multi-device support is needed.
+    if receiver && mouse_get(&d, target, PROP_PRODUCT)? != SCIMITAR_PID as u32 {
+        return None;
+    }
+    let level = percent(mouse_get(&d, target, PROP_BATTERY)?)?;
+    let charge = mouse_get(&d, target, PROP_CHARGE);
+    Some(DeviceStatus {
+        key: format!("corsair:{}", hex4(SCIMITAR_PID)),
+        name: "Corsair Scimitar Elite Wireless SE".into(),
+        kind: DeviceKind::Mouse,
+        via: if receiver { "2.4 GHz receiver".into() } else { "USB cable".into() },
+        percent: level,
+        charging: charge == Some(1),
+        full: charge == Some(3),
+        grace_sec: 1800,
+        hw: Some((c.vid, c.pid)),
+        ..Default::default()
+    })
 }
 
 fn get(d: &HidDev, target: u8, prop: u8) -> Option<Option<u32>> {
@@ -111,6 +189,26 @@ pub fn poll(ctx: &mut PollContext) {
         };
         ctx.add(s, VID, pid);
     }
+
+    for (vid, pid) in ctx.products(VID) {
+        let (target, receiver) = if SLIPSTREAM_RECEIVERS.contains(&pid) {
+            (0x09, true)
+        } else if pid == SCIMITAR_PID {
+            (0x08, false)
+        } else {
+            continue;
+        };
+        let colls = ctx.find(vid, pid, |c| c.page() == 0xFF42 && c.in_len() >= 6 && c.out_len() >= 6);
+        let Some(s) = colls.iter().find_map(|c| scimitar(c, target, receiver)) else { continue };
+        if let Some(old) = ctx.out.iter_mut().find(|o| o.key == s.key) {
+            if s.via == "USB cable" {
+                *old = s;
+            }
+            ctx.claim(vid, pid);
+        } else {
+            ctx.add(s, vid, pid);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -146,5 +244,30 @@ mod tests {
         assert_eq!(percent(1000), Some(100));
         assert_eq!(percent(0), Some(0));
         assert_eq!(percent(1001), None);
+    }
+
+    #[test]
+    fn mouse_protocol() {
+        assert_eq!(mouse_request(0x09, PROP_BATTERY), [0x00, 0x09, 0x02, 0x0F]);
+        // Recorded on a Scimitar Elite Wireless SE (receiver 2B00).
+        assert_eq!(mouse_reply(&[0x01, 0x02, 0x00, 0x22, 0x2B, 0, 0], 0x09), Some(SCIMITAR_PID as u32));
+        assert_eq!(mouse_reply(&[0x01, 0x02, 0x00, 0xE8, 0x03, 0, 0], 0x09).and_then(percent), Some(100));
+        assert_eq!(mouse_reply(&[0x01, 0x06, 0x00, 0x00, 0x00, 0, 0], 0x09), None); // reply to iCUE
+        assert_eq!(mouse_reply(&[0x00, 0x02, 0x00, 0x00, 0x2B, 0, 0], 0x09), None); // the receiver
+        assert_eq!(mouse_reply(&[0x00, 0x02, 0x00, 0x6E, 0x03, 0, 0], 0x08).and_then(percent), Some(88));
+        assert_eq!(mouse_reply(&[0x01, 0x02, 0x05, 0xA5, 0xA5, 0, 0], 0x09), None);
+    }
+
+    #[test]
+    fn foreign_reply_is_outvoted() {
+        let run = |v: &[u32]| {
+            let mut it = v.iter().copied();
+            agreed(|| it.next())
+        };
+        assert_eq!(run(&[878, 878]), Some(878));
+        assert_eq!(run(&[3, 878, 878]), Some(878));
+        assert_eq!(run(&[878, 3, 878, 878]), Some(878));
+        assert_eq!(run(&[1, 2, 3, 4, 4]), None);
+        assert_eq!(run(&[878]), None);
     }
 }

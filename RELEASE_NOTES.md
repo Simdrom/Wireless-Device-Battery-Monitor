@@ -1,4 +1,4 @@
-# BatteryHub v1.6.1 (Rust)
+# BatteryHub v1.6.3 (Rust)
 
 An ultra-lightweight Rust implementation of BatteryHub for Windows, a recode of [krisgfx9/Wireless-Device-Battery-Monitor](https://github.com/krisgfx9/Wireless-Device-Battery-Monitor). All credit for the original idea, look and device protocols goes to the original project.
 
@@ -6,10 +6,18 @@ An ultra-lightweight Rust implementation of BatteryHub for Windows, a recode of 
 
 | File | |
 |---|---|
-| `BatteryHub-Taskbar-Setup-v1.6.1.exe` | Setup: Install / Update / Uninstall |
+| `BatteryHub-Taskbar-Setup-v1.6.3.exe` | Setup: Install / Update / Uninstall |
 | `SHA256SUMS.txt` | Checksum |
 
 Already installed? Use *Check for updates...* in the right-click menu (v1.1 and later), or run the new setup and click **Update**. Your settings and autostart choice are kept.
+
+## New in v1.6.3
+
+- **Corsair Scimitar Elite Wireless SE:** the battery level is now read on the Slipstream receiver, also while iCUE is running.
+
+## New in v1.6.2
+
+- **New devices:** SteelSeries Arctis Nova Pro Omni battery reporting.
 
 ## New in v1.6.1
 

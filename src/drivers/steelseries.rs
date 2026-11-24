@@ -92,6 +92,23 @@ fn nova_pro_wireless(d: &HidDev, pid: u16) -> Option<DeviceStatus> {
     Some(s)
 }
 
+/// Arctis Nova Pro Omni: 01 B0 -> [6] headset %, [7] dock %, [14] link, [15] charge.
+fn nova_pro_omni(d: &HidDev, pid: u16) -> Option<DeviceStatus> {
+    let r = write_read(d, &[0x01, 0xB0], 1000).filter(|r| r.len() >= 17 && r[0] == 0x01 && r[1] == 0xB0)?;
+    Some(decode_nova_pro_omni(pid, &r))
+}
+
+fn decode_nova_pro_omni(pid: u16, r: &[u8]) -> DeviceStatus {
+    let mut s = headset(pid, "SteelSeries Arctis Nova Pro Omni");
+    s.connected = r[14] == 0x08 && r[15] != 0x01;
+    s.charging = r[15] == 0x02;
+    s.percent = if s.connected { r[6].min(99) as i32 } else { -1 };
+    if s.percent == 99 {
+        s.percent = 100;
+    }
+    s
+}
+
 /// Nova family: 00 B0 -> status block; layout depends on the model.
 fn nova_family(d: &HidDev, pid: u16) -> Option<DeviceStatus> {
     let r = write_read(d, &[0x00, 0xB0], 1000).filter(|r| r.len() >= 7)?;
@@ -297,6 +314,7 @@ fn models() -> Vec<(Vec<u16>, AcceptFn, PollFn)> {
         (vec![0x12C2], iface0, arctis9),
         (vec![0x1290], iface0, arctis_pro_wireless),
         (vec![0x12E0, 0x225D], iface4, nova_pro_wireless),
+        (vec![0x2290], page_ffc0, nova_pro_omni),
         (
             vec![
                 0x220E, 0x2212, 0x2216, 0x2236, 0x2269, 0x226D, 0x2232, 0x2253, 0x230A, 0x2202, 0x22A1, 0x227E, 0x2206, 0x2258, 0x229E, 0x22AD, 0x223A, 0x22A9,
@@ -363,5 +381,18 @@ mod tests {
         // Nova 7 (2202) reports 0..4 steps.
         let s = decode_nova(0x2202, &[0xB0, 0x00, 0x03, 0x03, 0x00, 0x00, 0x00]);
         assert_eq!(s.percent, 75);
+    }
+
+    #[test]
+    fn nova_pro_omni_status() {
+        let mut r = vec![0u8; 17];
+        r[..2].copy_from_slice(&[0x01, 0xB0]);
+        r[6] = 99;
+        r[7] = 42;
+        r[14] = 0x08;
+        r[15] = 0x02;
+        let s = decode_nova_pro_omni(0x2290, &r);
+        assert!(s.connected && s.charging);
+        assert_eq!(s.percent, 100);
     }
 }
