@@ -1,4 +1,4 @@
-# BatteryHub v1.6.3 (Rust)
+# BatteryHub v1.6.4 (Rust)
 
 An ultra-lightweight Rust implementation of BatteryHub for Windows, a recode of [krisgfx9/Wireless-Device-Battery-Monitor](https://github.com/krisgfx9/Wireless-Device-Battery-Monitor). All credit for the original idea, look and device protocols goes to the original project.
 
@@ -6,10 +6,16 @@ An ultra-lightweight Rust implementation of BatteryHub for Windows, a recode of 
 
 | File | |
 |---|---|
-| `BatteryHub-Taskbar-Setup-v1.6.3.exe` | Setup: Install / Update / Uninstall |
+| `BatteryHub-Taskbar-Setup-v1.6.4.exe` | Setup: Install / Update / Uninstall |
 | `SHA256SUMS.txt` | Checksum |
 
-Already installed? Use *Check for updates...* in the right-click menu (v1.1 and later), or run the new setup and click **Update**. Your settings and autostart choice are kept.
+Already installed? Use *Check for updates...* in the right-click menu (v1.1 and later), or run the new setup: it updates by itself. Your settings and autostart choice are kept.
+
+## New in v1.6.4
+
+- **Setup is installer and updater in one:** opened over an older version, it closes BatteryHub, updates it and starts it again without another click. It never replaces a newer version unasked, and if an update fails the version that was running is started again.
+- **Dock battery:** headsets whose base station charges a spare battery (SteelSeries Arctis Nova Pro Omni, Nova Pro Wireless, Nova Elite) show it in the hover card and the dashboard: level and charging, or full.
+- **New devices:** SteelSeries Arctis Nova Elite and Nova Pro Wireless X (`12E5`); untested.
 
 ## New in v1.6.3
 

@@ -136,7 +136,7 @@ Since v1.6 the setup is a Windows 11 style window. It first checks what is on th
 | Button | When | What it does |
 |---|---|---|
 | **Install** | not installed | Installs, with a Start menu shortcut, and the choices *Desktop shortcut*, *Start automatically when I sign in to Windows* and *Start BatteryHub when setup is done* |
-| **Update to ...** | an older version is installed | Replaces the program and keeps your settings, history and autostart; restarts it if it was running |
+| *(automatic update)* | an older version is installed | Starts right away: closes BatteryHub, replaces the program, keeps your settings, history and autostart, and starts it again. If it fails, the version that was running is started again |
 | **Reinstall** | the same version is installed | Writes the program again (repairs a damaged install) |
 | **Go back to ...** | a newer version is installed | Installs this setup's older version, keeping your settings |
 | **Other versions...** | always | Lists every release on GitHub; the chosen one is downloaded, checked against its SHA-256 checksum and installed |
@@ -146,7 +146,7 @@ The new program file is written next to the old one, read back and checked (SHA-
 
 BatteryHub also appears in **Settings → Apps → Installed apps** (name, version, publisher, size), where *Uninstall* opens the same window.
 
-Command line for scripts: `/install`, `/update`, `/uninstall`, `/S` (silent), `/autostart=yes|no`, `/desktop=yes|no`, `/nolaunch`, `/nonotify` (no "Update finished" message afterwards), `/purge` (uninstall: also remove settings and history), `/versions` (open the version list).
+Command line for scripts: `/install`, `/update`, `/uninstall`, `/S` (silent; installs or updates, and leaves a newer version alone unless `/install` is given), `/autostart=yes|no`, `/desktop=yes|no`, `/nolaunch`, `/nonotify` (no "Update finished" message afterwards), `/purge` (uninstall: also remove settings and history), `/versions` (open the version list).
 
 | Where the files go | |
 |---|---|
@@ -196,7 +196,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Family | Notes |
 |---|---|
 | Logitech | HID++ 1.0 / 2.0 over Unifying, Bolt, LIGHTSPEED, Bluetooth and USB, plus G headsets (voltage curves) |
-| SteelSeries | Arctis 1 / 7 / 9 / Pro, Arctis Nova (3P, 5, 7, 7+, Pro, Pro Omni), GameBuds, Aerox, Prime, Rival |
+| SteelSeries | Arctis 1 / 7 / 9 / Pro, Arctis Nova (3P, 5, 7, 7+, Pro, Pro Omni, Elite; with the dock battery on Pro Wireless, Pro Omni and Elite), GameBuds, Aerox, Prime, Rival |
 | Razer | Mice, keyboards and receivers (90-byte feature report protocol); BlackShark V3 headset over its HyperSpeed dongle `1532:057A` or USB cable `1532:0579` (protocol from OpenRazer PR #2794 and Joule); BlackShark V2 Pro (2023) over its HyperSpeed dongle `1532:0555` (protocol from OpenRazer PR #2862 and [blackshark-battery](https://github.com/matej-basic/blackshark-battery), MIT); Barracuda X Chroma over its 2.4 GHz dongle `1532:0574` (protocol from [batterywatch](https://github.com/itayavra/batterywatch), GPL-3.0); Nari over its 2.4 GHz dongle `1532:051C` (request and answer from [RazerNariBatteryLevel](https://github.com/Modzeleczek/RazerNariBatteryLevel)'s Synapse capture, field layout from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, and [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; level in coarse steps, none while charging) |
 | ASUS ROG Pelta | Headset over its 2.4 GHz dongle `0B05:1B84` or USB cable `0B05:1B82` (protocol from [pelta-control](https://github.com/jimm0thy/pelta-control), MIT, from captures of Armoury Crate, as used by the original C++ BatteryHub) |
 | Redragon (Areson) | M913 Impact Elite, M915RGB-WL and other devices on the "2.4G Wireless Receiver" `25A7:FA07` / `FA08`; level in 10 % steps (protocol as documented by the original C++ BatteryHub from a capture of Redragon's software, [m913-ctl](https://github.com/Qehbr/m913-ctl) and [redragon-m913-battery-tray](https://github.com/Doomguy-BFG9000/redragon-m913-battery-tray)) |
@@ -308,7 +308,7 @@ Requirements: Rust 1.99 or newer (stable, MSVC toolchain; the crates use the 202
 .\build-release.ps1
 ```
 
-This builds the program, then the setup with the program embedded (`installer/`, `BH_PAYLOAD_DIR`), and writes `release\BatteryHub-Taskbar-Setup-v1.6.3.exe` and `SHA256SUMS.txt`. The version comes from the `VERSION` file (up to four parts, e.g. `1.0.1.1`).
+This builds the program, then the setup with the program embedded (`installer/`, `BH_PAYLOAD_DIR`), and writes `release\BatteryHub-Taskbar-Setup-v1.6.4.exe` and `SHA256SUMS.txt`. The version comes from the `VERSION` file (up to four parts, e.g. `1.0.1.1`).
 
 | Path | Contents |
 |---|---|
