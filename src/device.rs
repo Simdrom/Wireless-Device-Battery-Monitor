@@ -291,6 +291,7 @@ pub fn poll_hardware(ids: &[(u16, u16)]) -> Vec<DeviceStatus> {
     drivers::jabra::poll(&mut ctx);
     drivers::zowie::poll(&mut ctx);
     drivers::keychron::poll(&mut ctx);
+    drivers::keychron_nape::poll(&mut ctx);
     drivers::hyperx_flight::poll(&mut ctx); // tested on hardware (PR #93); before hyperx_legacy
     drivers::hyperx_legacy::poll(&mut ctx);
     drivers::drivercore::poll(&mut ctx);
@@ -298,6 +299,7 @@ pub fn poll_hardware(ids: &[(u16, u16)]) -> Vec<DeviceStatus> {
     drivers::sinowealth::poll(&mut ctx);
     drivers::endgame_4k::poll(&mut ctx);
     drivers::mchose_glw::poll(&mut ctx);
+    drivers::mchose_g3::poll(&mut ctx);
     drivers::playstation::poll(&mut ctx);
     drivers::generic::poll(&mut ctx);
     ctx.out
@@ -415,6 +417,7 @@ fn poll_with(colls: Vec<HidColl>) -> Vec<DeviceStatus> {
     drivers::jabra::poll(&mut ctx);
     drivers::zowie::poll(&mut ctx);
     drivers::keychron::poll(&mut ctx);
+    drivers::keychron_nape::poll(&mut ctx);
     drivers::hyperx_flight::poll(&mut ctx); // tested on hardware (PR #93); before hyperx_legacy
     drivers::hyperx_legacy::poll(&mut ctx);
     drivers::drivercore::poll(&mut ctx);
@@ -422,6 +425,7 @@ fn poll_with(colls: Vec<HidColl>) -> Vec<DeviceStatus> {
     drivers::sinowealth::poll(&mut ctx);
     drivers::endgame_4k::poll(&mut ctx);
     drivers::mchose_glw::poll(&mut ctx);
+    drivers::mchose_g3::poll(&mut ctx);
     drivers::playstation::poll(&mut ctx);
     drivers::airpods::poll(&mut ctx);
     drivers::bluetooth::poll(&mut ctx);
