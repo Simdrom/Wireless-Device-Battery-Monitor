@@ -323,6 +323,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | IO Airox | Receiver `249A:5C2F`, shared with the AJAZZ AJ159P (vendor collection `FF01:0010` with the same 33-byte reports; protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#236](../../issues/236)) |
 | Ninjutso Sora V3 | Receiver `093A:EB02` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, and [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, verified on a Ninjutso Ten Air there; untested here on a Sora V3, [#198](../../issues/198)) |
 | AULA Kunlun X5 | Receiver `38A6:28F9` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, which lists this receiver, and [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#194](../../issues/194)) |
+| Rapoo VT7 Max | Receiver `24AE:1416`; the mouse pushes its level by itself, nothing is sent (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#249](../../issues/249)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -394,7 +395,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Apple Watch Magnetic Charging Cable | `05AC:1392` | A charger: the watch does not report its battery to Windows through it | [#230](../../issues/230) |
 | KRUX Plasma Wireless | not reported | The receiver's id was not in the request; please comment with its VID:PID | [#239](../../issues/239) |
 | Ardor Gaming Edge Wireless | `3206:0881` | The dongle has only media keys, no vendor channel. Over Bluetooth it works when Windows shows the level. | [#244](../../issues/244) |
-| Rapoo gaming receiver | `24AE:1416` | No documented protocol for this receiver (like the VT9PRO on `24AE:1211`); commands are not guessed | [#249](../../issues/249) |
 | H2015 Pro headset | `3206:0871` | No documented battery query for its dongle; commands are not guessed | [#242](../../issues/242) |
 
 ## Testing

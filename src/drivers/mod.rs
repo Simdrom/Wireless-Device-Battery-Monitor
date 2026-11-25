@@ -57,6 +57,7 @@ pub mod ninjutso;
 pub mod nzxt;
 pub mod piao;
 pub mod playstation;
+pub mod rapoo;
 pub mod rawm;
 pub mod razer;
 pub mod razer_nari;
