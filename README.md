@@ -324,6 +324,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Ninjutso Sora V3 | Receiver `093A:EB02` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, and [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, verified on a Ninjutso Ten Air there; untested here on a Sora V3, [#198](../../issues/198)) |
 | AULA Kunlun X5 | Receiver `38A6:28F9` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, which lists this receiver, and [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#194](../../issues/194)) |
 | Rapoo VT7 Max | Receiver `24AE:1416`; the mouse pushes its level by itself, nothing is sent (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#249](../../issues/249)) |
+| Rapoo VT9PRO 4K | Receiver `24AE:1211`; listens for the status report Rapoo's older mice push, nothing is sent (report layout from [Device-Battery-Info](https://github.com/PyFlat/Device-Battery-Info), [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; expected for this receiver, untested, [#11](../../issues/11)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -349,7 +350,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | UGREEN 2.4 GHz receiver | `2B89:0043` | The receiver has no battery or link-state channel (UGREEN's own software doesn't read it either). Over Bluetooth it works when Windows shows the level. | [#108](../../issues/108) |
 | 8BitDo Retro Mechanical Keyboard receiver | `2DC8:5201` | No documented battery command; its vendor channel is also the firmware-update channel, so commands are not guessed | [#5](../../issues/5) |
 | Mojhon Storm / BIGBIG WON controller | `E2B7:122C` | XInput dongle that reports no battery level | [#8](../../issues/8) |
-| Rapoo VT9PRO 4K | `24AE:1211` | No documented protocol | [#11](../../issues/11) |
 | Edifier HECATE G5 Wireless | `35BB:A008` | No documented protocol for its headset dongle (the supported HECATE mice use other ids) | [#15](../../issues/15), [#131](../../issues/131) |
 | "2.4G Wireless Device" keyboard | `1A2C:7FFF` | No documented protocol (not the Semico `AA 55 CC 33` layout of the `1A2C:8FFF` keyboards). Over Bluetooth it works when Windows shows the level. | [#136](../../issues/136) |
 | Maono DM40 / DM40 Pro wireless microphone (receiver) | `352F:0405` | The receiver only has a consumer-control collection with 65-byte reports; the battery level is read by Maono's own app over an undocumented protocol, so commands are not guessed. | [#140](../../issues/140) |

@@ -1,4 +1,4 @@
-//! Rapoo VT7 Max mouse on its 2.4 GHz receiver (24AE:1416).
+//! Rapoo VT7 Max (24AE:1416) and VT9PRO 4K (24AE:1211) mice on their 2.4 GHz receivers.
 //!
 //! Protocol as documented by TaskbarVitals (GPL-3.0, github.com/symNistaken/TaskbarVitals, docs/rapoo.md
 //! and src/drivers/rapoo.cpp: Rapoo Hub's VT_nrf54L decoder and captures from real mice) and BatteryTray
@@ -9,9 +9,15 @@
 //!   07 MO .. .. .. .. .. ST LL ...     MO low nibble 0 receiver, 1 Bluetooth, 2 cable
 //!                                      ST 1 on battery, 2 charging (0 = not valid yet), LL level
 //!
+//! The older firmware's 7-byte report on the same collection (VT3 Pro, VT1 Pro Max and, by OpenMouse's
+//! captures, VT9 Pro on 24AE:1205; Device-Battery-Info's RapooProtocol.cs, github.com/PyFlat/
+//! Device-Battery-Info), expected from the VT9PRO 4K's receiver, whose collection has that length (#11):
+//!
+//!   BB B0 .. .. .. ST LL               ST, LL as above; LL 7F = not known while charging
+//!
 //! The other vendor collections (settings, firmware) are never opened. A mouse that is off or asleep
 //! pushes nothing: it is not listed until it does, then shown asleep by the app. Not tested on hardware by
-//! this project (issue #249).
+//! this project (issues #249, #11).
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
@@ -34,7 +40,10 @@ struct Model {
     decode: fn(&[u8]) -> Option<(i32, bool)>,
 }
 
-const MODELS: [Model; 1] = [Model { pid: 0x1416, name: "Rapoo VT7 Max", len: 19, decode: decode_nordic }];
+const MODELS: [Model; 2] = [
+    Model { pid: 0x1416, name: "Rapoo VT7 Max", len: 19, decode: decode_nordic },
+    Model { pid: 0x1211, name: "Rapoo VT9PRO 4K", len: 7, decode: decode_legacy },
+];
 
 /// State and level bytes of a status report.
 fn state(st: u8, level: u8) -> Option<(i32, bool)> {
@@ -47,6 +56,14 @@ pub fn decode_nordic(r: &[u8]) -> Option<(i32, bool)> {
         return None;
     }
     state(r[7], r[8])
+}
+
+/// The older firmware's report BB (report id included): level, charging.
+pub fn decode_legacy(r: &[u8]) -> Option<(i32, bool)> {
+    if r.len() < 7 || r[..2] != [0xBB, 0xB0] {
+        return None;
+    }
+    state(r[5], r[6])
 }
 
 fn listen(c: &HidColl, decode: fn(&[u8]) -> Option<(i32, bool)>) -> Option<(i32, bool)> {
@@ -116,6 +133,15 @@ mod tests {
         assert_eq!(decode_nordic(&rx), Some((25, false)));
         let cable = [0x07, 0x12, 0x04, 0x80, 0x0C, 0x80, 0x0C, 0x02, 0x64, 0x00, 0x03, 0x01, 0x00, 0x14, 0x46, 0x01, 0x02, 0x02, 0x00];
         assert_eq!(decode_nordic(&cable), Some((100, true)));
+    }
+
+    #[test]
+    fn legacy_reports() {
+        // A VT1 Pro Max owner's captures (TaskbarVitals): receiver 100 %, cable 95 % charging.
+        assert_eq!(decode_legacy(&[0xBB, 0xB0, 0x71, 0x84, 0x03, 0x01, 0x64]), Some((100, false)));
+        assert_eq!(decode_legacy(&[0xBB, 0xB0, 0x71, 0x84, 0x03, 0x02, 0x5F]), Some((95, true)));
+        assert_eq!(decode_legacy(&[0xBB, 0xB0, 0x71, 0x84, 0x03, 0x02, 0x7F]), None);
+        assert_eq!(decode_legacy(&[0xBB, 0xB1, 0x71, 0x84, 0x03, 0x01, 0x64]), None);
     }
 
     #[test]
