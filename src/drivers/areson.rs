@@ -14,14 +14,31 @@
 //!   reply    input        09 04 00 .. .. 02 LL CC 00 ... SS
 //!            LL = level 0..10 (x 10 %), CC non-zero = charging; all 17 bytes sum to 0x55
 //!
-//! Only this read is sent. The FA7B / FA7C receivers report the level on another scale and are not
-//! handled. No reply means the device is off or asleep (the receiver stays plugged in).
+//! Only this read is sent. No reply means the device is off or asleep (the receiver stays plugged in).
+//!
+//! The 25A7:FA7C receiver (Redragon M693, Fantech Helios Go XD5 and others; issue #225) answers the
+//! same request with LL as a whole percentage: BatteryTray (MIT, github.com/qu1ncky/BatteryTray,
+//! src/providers/oem_mouse.rs) and redragon-mouse-linux's PROTOCOL.md (github.com/rajchauhan28/
+//! redragon-mouse-linux), as cited by TaskbarVitals' docs/areson.md. Not tested here on hardware.
 use crate::device::{DeviceKind, DeviceStatus, PollContext};
 use crate::hid::{self, HidColl, HidDev};
 use crate::util::{hex4, sleep_ms};
 
 const VID: u16 = 0x25A7;
-const PIDS: [u16; 2] = [0xFA07, 0xFA08];
+
+struct Receiver {
+    pid: u16,
+    /// What one unit of the level byte is worth, in percent.
+    step: i32,
+    name: &'static str,
+}
+
+const RECEIVERS: [Receiver; 3] = [
+    Receiver { pid: 0xFA07, step: 10, name: "Redragon wireless device" },
+    Receiver { pid: 0xFA08, step: 10, name: "Redragon wireless device" },
+    Receiver { pid: 0xFA7C, step: 1, name: "Wireless mouse" },
+];
+
 const LEN: usize = 17;
 const WAIT_MS: u32 = 1800;
 
@@ -37,15 +54,16 @@ pub fn request() -> [u8; LEN] {
     r
 }
 
-/// GetPower reply: Some((percent, charging)).
-pub fn decode(r: &[u8]) -> Option<(i32, bool)> {
-    if r.len() < LEN || sum(&r[..LEN]) != 0x55 || r[0] != 0x09 || r[1] != 0x04 || r[2] != 0x00 || r[6] > 10 {
+/// GetPower reply: Some((percent, charging)); `step` is what one unit of the level is worth.
+pub fn decode(r: &[u8], step: i32) -> Option<(i32, bool)> {
+    if r.len() < LEN || sum(&r[..LEN]) != 0x55 || r[0] != 0x09 || r[1] != 0x04 || r[2] != 0x00 {
         return None;
     }
-    Some((r[6] as i32 * 10, r[7] != 0))
+    let percent = r[6] as i32 * step;
+    (percent <= 100).then_some((percent, r[7] != 0))
 }
 
-fn query(cmd: &HidColl, input: &HidColl) -> Option<(i32, bool)> {
+fn query(cmd: &HidColl, input: &HidColl, step: i32) -> Option<(i32, bool)> {
     let c = HidDev::open_feature_only(cmd).or_else(|| HidDev::open(cmd))?;
     let rx = HidDev::open(input)?;
     for attempt in 0..2 {
@@ -56,7 +74,7 @@ fn query(cmd: &HidColl, input: &HidColl) -> Option<(i32, bool)> {
         if !c.set_feature(&request()) {
             return None;
         }
-        if let Some(v) = rx.read(WAIT_MS).and_then(|r| decode(&r)) {
+        if let Some(v) = rx.read(WAIT_MS).and_then(|r| decode(&r, step)) {
             return Some(v);
         }
     }
@@ -64,7 +82,8 @@ fn query(cmd: &HidColl, input: &HidColl) -> Option<(i32, bool)> {
 }
 
 pub fn poll(ctx: &mut PollContext) {
-    for pid in PIDS {
+    for rx in &RECEIVERS {
+        let pid = rx.pid;
         if ctx.is_claimed(VID, pid) {
             continue;
         }
@@ -74,14 +93,14 @@ pub fn poll(ctx: &mut PollContext) {
         let kind = hid::kind_from_collections(&ctx.colls, VID, pid);
         let base = DeviceStatus {
             key: format!("areson:{}:{}", hex4(VID), hex4(pid)),
-            name: "Redragon wireless device".into(),
+            name: rx.name.into(),
             kind: if kind == DeviceKind::Other { DeviceKind::Mouse } else { kind },
             via: "2.4 GHz receiver".into(),
             hw: Some((VID, pid)),
             grace_sec: 1800,
             ..Default::default()
         };
-        let s = match query(cmd, input) {
+        let s = match query(cmd, input, rx.step) {
             Some((percent, charging)) => DeviceStatus { percent, charging, ..base },
             None => DeviceStatus { connected: false, ..base },
         };
@@ -107,7 +126,7 @@ mod tests {
         let mut r = [0u8; 17];
         r[..8].copy_from_slice(&[0x09, 0x04, 0x00, 0x00, 0x00, 0x02, 0x08, 0x00]);
         r[16] = 0x3E;
-        assert_eq!(decode(&r), Some((80, false)));
+        assert_eq!(decode(&r, 10), Some((80, false)));
     }
 
     #[test]
@@ -118,15 +137,24 @@ mod tests {
             r[16] = 0x55u8.wrapping_sub(sum(&r[..16]));
             r
         };
-        assert_eq!(decode(&frame(5, 1)), Some((50, true)));
-        assert_eq!(decode(&frame(11, 0)), None); // not on the 0..10 scale
+        assert_eq!(decode(&frame(5, 1), 10), Some((50, true)));
+        assert_eq!(decode(&frame(11, 0), 10), None); // not on the 0..10 scale
         let mut bad = frame(8, 0);
         bad[16] ^= 1;
-        assert_eq!(decode(&bad), None); // checksum
-        assert_eq!(decode(&request()), None); // our own request
+        assert_eq!(decode(&bad, 10), None); // checksum
+        assert_eq!(decode(&request(), 10), None); // our own request
         let mut status = frame(1, 0);
         status[1] = 0x03; // GetConnectStatus reply
         status[16] = 0x55u8.wrapping_sub(sum(&status[..16]));
-        assert_eq!(decode(&status), None);
+        assert_eq!(decode(&status, 10), None);
+    }
+
+    #[test]
+    fn whole_percent_receiver() {
+        let mut r = [0u8; LEN];
+        r[..8].copy_from_slice(&[0x09, 0x04, 0x00, 0x00, 0x00, 0x02, 87, 0x01]);
+        r[LEN - 1] = 0x55u8.wrapping_sub(sum(&r[..LEN - 1]));
+        assert_eq!(decode(&r, 1), Some((87, true)));
+        assert_eq!(decode(&r, 10), None); // 870 % on the tens scale
     }
 }
