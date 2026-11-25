@@ -20,6 +20,12 @@
 //! HeadsetControl's fixed request 51 08 00 03 1A 00 03 00 04 0A: 51 03 = acknowledgement, 51 05 with
 //! byte 6 = 00 = headset off, 51 0B with byte 8 = 04 = battery (byte 10 level, byte 12 = 02 charging).
 //! Only these reads are sent; no setting is changed.
+//!
+//! G325 LIGHTSPEED (046D:0B21, issue #206): the later Centurion headsets start their frames with 50 23
+//! instead of 51 (HeadsetControl's logitech_g522_lightspeed.hpp, BatteryTray's centurion.rs), and Solaar
+//! (lib/logitech_receiver/device.py) treats the G325 as a Centurion headset. Its receiver has the same
+//! FFA0:0001 64/64 collection. A receiver ignores frames with another prefix, and the features are
+//! looked up as above; no fixed request is sent to it. Not tested on hardware by this project.
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -28,7 +34,21 @@ use crate::hid::{HidColl, HidDev};
 use crate::util::{Deadline, hex4};
 
 const VID: u16 = 0x046D;
-const PID: u16 = 0x0AF7;
+/// What starts every frame: report 51 on the PRO X 2, report 50 and the address 23 on later models.
+const PRO_X_2: &[u8] = &[0x51];
+const ADDRESSED: &[u8] = &[0x50, 0x23];
+
+struct Model {
+    pid: u16,
+    name: &'static str,
+    prefix: &'static [u8],
+}
+
+const MODELS: [Model; 2] = [
+    Model { pid: 0x0AF7, name: "Logitech G PRO X 2 LIGHTSPEED", prefix: PRO_X_2 },
+    Model { pid: 0x0B21, name: "Logitech G325 LIGHTSPEED", prefix: ADDRESSED },
+];
+
 const REPORT: u8 = 0x51;
 const SW: u8 = 0x01;
 const BRIDGE_SEND: u8 = 0x10;
@@ -37,34 +57,34 @@ const FEATURE_BATTERY: u16 = 0x0104;
 const LEGACY: [u8; 10] = [0x51, 0x08, 0x00, 0x03, 0x1A, 0x00, 0x03, 0x00, 0x04, 0x0A];
 const WAIT_MS: u64 = 1500;
 
-pub fn frame(payload: &[u8]) -> [u8; 64] {
+pub fn frame(prefix: &[u8], payload: &[u8]) -> [u8; 64] {
     let mut f = [0u8; 64];
-    f[0] = REPORT;
-    f[1] = payload.len() as u8 + 1;
-    f[3..3 + payload.len().min(61)].copy_from_slice(&payload[..payload.len().min(61)]);
+    let n = prefix.len();
+    f[..n].copy_from_slice(prefix);
+    f[n] = payload.len() as u8 + 1;
+    let len = payload.len().min(62 - n);
+    f[n + 2..n + 2 + len].copy_from_slice(&payload[..len]);
     f
 }
 
 /// The payload of a received frame (after the length and flags bytes).
-pub fn payload(r: &[u8]) -> Option<&[u8]> {
-    if r.len() < 4 || r[0] != REPORT {
-        return None;
-    }
-    let len = r[1] as usize;
-    (len > 1 && len + 2 <= r.len()).then(|| &r[3..len + 2])
+pub fn payload<'a>(prefix: &[u8], r: &'a [u8]) -> Option<&'a [u8]> {
+    let r = r.strip_prefix(prefix)?;
+    let len = *r.first()? as usize;
+    (len > 1 && len < r.len()).then(|| &r[2..len + 1])
 }
 
-pub fn direct(index: u8, function: u8, params: &[u8]) -> [u8; 64] {
+pub fn direct(prefix: &[u8], index: u8, function: u8, params: &[u8]) -> [u8; 64] {
     let mut p = vec![index, (function & 0xF0) | SW];
     p.extend_from_slice(params);
-    frame(&p)
+    frame(prefix, &p)
 }
 
-pub fn bridged(bridge: u8, index: u8, function: u8, params: &[u8]) -> [u8; 64] {
+pub fn bridged(prefix: &[u8], bridge: u8, index: u8, function: u8, params: &[u8]) -> [u8; 64] {
     let size = 3 + params.len();
     let mut p = vec![bridge, BRIDGE_SEND | SW, (size >> 8) as u8 & 0x0F, size as u8, 0x00, index, (function & 0xF0) | SW];
     p.extend_from_slice(params);
-    frame(&p)
+    frame(prefix, &p)
 }
 
 /// Data of a direct reply for feature `index`.
@@ -152,31 +172,31 @@ enum Error {
     Failed,
 }
 
-fn ask_direct(d: &HidDev, index: u8, function: u8, params: &[u8]) -> Result<Vec<u8>, Error> {
+fn ask_direct(d: &HidDev, prefix: &[u8], index: u8, function: u8, params: &[u8]) -> Result<Vec<u8>, Error> {
     d.flush();
-    if !d.write(&direct(index, function, params)) {
+    if !d.write(&direct(prefix, index, function, params)) {
         return Err(Error::Failed);
     }
     let end = Deadline::in_ms(WAIT_MS);
     while !end.passed() {
         let Some(r) = d.read(end.left_ms()) else { continue };
-        if let Some(data) = payload(&r).and_then(|p| direct_reply(p, index)) {
+        if let Some(data) = payload(prefix, &r).and_then(|p| direct_reply(p, index)) {
             return Ok(data);
         }
     }
     Err(Error::Failed)
 }
 
-fn ask_bridged(d: &HidDev, bridge: u8, index: u8, function: u8, params: &[u8]) -> Result<Vec<u8>, Error> {
+fn ask_bridged(d: &HidDev, prefix: &[u8], bridge: u8, index: u8, function: u8, params: &[u8]) -> Result<Vec<u8>, Error> {
     d.flush();
-    if !d.write(&bridged(bridge, index, function, params)) {
+    if !d.write(&bridged(prefix, bridge, index, function, params)) {
         return Err(Error::Failed);
     }
     let end = Deadline::in_ms(WAIT_MS);
     let mut acked = false;
     while !end.passed() {
         let Some(r) = d.read(end.left_ms()) else { continue };
-        match payload(&r).map(|p| bridge_reply(p, bridge, index)) {
+        match payload(prefix, &r).map(|p| bridge_reply(p, bridge, index)) {
             Some(Bridge::Answer(data)) => return Ok(data),
             Some(Bridge::Ack) => acked = true,
             Some(Bridge::Rejected) | Some(Bridge::Disconnected) => return Err(Error::Offline),
@@ -210,19 +230,19 @@ fn ask_legacy(d: &HidDev) -> Result<(i32, bool, bool), Error> {
 type Indexes = HashMap<String, (u8, Option<u8>)>;
 static INDEXES: Mutex<Option<Indexes>> = Mutex::new(None);
 
-fn read(c: &HidColl) -> Result<(i32, bool, bool), Error> {
+fn read(c: &HidColl, prefix: &[u8]) -> Result<(i32, bool, bool), Error> {
     let d = HidDev::open(c).ok_or(Error::Failed)?;
     let cached = INDEXES.lock().unwrap_or_else(|e| e.into_inner()).as_ref().and_then(|m| m.get(&c.path).copied());
     let bridge = match cached {
         Some((b, _)) => b,
-        None => match ask_direct(&d, 0x00, 0x00, &feature_params(FEATURE_BRIDGE))?.first() {
+        None => match ask_direct(&d, prefix, 0x00, 0x00, &feature_params(FEATURE_BRIDGE))?.first() {
             Some(&b) if b != 0 => b,
             _ => return Err(Error::Failed),
         },
     };
     let battery = match cached.and_then(|(_, i)| i) {
         Some(i) => Ok(i),
-        None => match ask_bridged(&d, bridge, 0x00, 0x00, &feature_params(FEATURE_BATTERY)) {
+        None => match ask_bridged(&d, prefix, bridge, 0x00, 0x00, &feature_params(FEATURE_BATTERY)) {
             Ok(data) => match data.first() {
                 Some(&i) if i != 0 => Ok(i),
                 _ => Err(Error::NotSupported),
@@ -235,7 +255,7 @@ fn read(c: &HidColl) -> Result<(i32, bool, bool), Error> {
         g.get_or_insert_with(HashMap::new).insert(c.path.clone(), (bridge, battery));
     };
     match battery {
-        Ok(index) => match ask_bridged(&d, bridge, index, 0x00, &[]) {
+        Ok(index) => match ask_bridged(&d, prefix, bridge, index, 0x00, &[]) {
             Ok(data) => {
                 remember(Some(index));
                 parse_battery(&data).ok_or(Error::Failed)
@@ -247,6 +267,9 @@ fn read(c: &HidColl) -> Result<(i32, bool, bool), Error> {
         },
         Err(Error::NotSupported) => {
             remember(None);
+            if prefix != PRO_X_2 {
+                return Err(Error::Failed);
+            }
             ask_legacy(&d)
         }
         Err(e) => {
@@ -257,37 +280,29 @@ fn read(c: &HidColl) -> Result<(i32, bool, bool), Error> {
 }
 
 pub fn poll(ctx: &mut PollContext) {
-    if ctx.is_claimed(VID, PID) {
-        return;
-    }
-    let colls = ctx.find(VID, PID, |c| c.page() == 0xFFA0 && c.usage() == 0x0001 && c.in_len() >= 64 && c.out_len() >= 64);
-    if colls.is_empty() {
-        return;
-    }
-    let base = DeviceStatus {
-        key: format!("logi-centurion:{}", hex4(PID)),
-        name: "Logitech G PRO X 2 LIGHTSPEED".into(),
-        kind: DeviceKind::Headset,
-        via: "2.4 GHz receiver".into(),
-        hw: Some((VID, PID)),
-        grace_sec: 60,
-        ..Default::default()
-    };
-    let mut found = None;
-    for c in &colls {
-        match read(c) {
-            Ok(v) => {
-                found = Some(v);
-                break;
-            }
-            Err(_) => continue,
+    for m in &MODELS {
+        if ctx.is_claimed(VID, m.pid) {
+            continue;
         }
+        let colls = ctx.find(VID, m.pid, |c| c.page() == 0xFFA0 && c.usage() == 0x0001 && c.in_len() >= 64 && c.out_len() >= 64);
+        if colls.is_empty() {
+            continue;
+        }
+        let base = DeviceStatus {
+            key: format!("logi-centurion:{}", hex4(m.pid)),
+            name: m.name.into(),
+            kind: DeviceKind::Headset,
+            via: "2.4 GHz receiver".into(),
+            hw: Some((VID, m.pid)),
+            grace_sec: 60,
+            ..Default::default()
+        };
+        let s = match colls.iter().find_map(|c| read(c, m.prefix).ok()) {
+            Some((level, charging, full)) => DeviceStatus { percent: level, charging, full, ..base },
+            None => DeviceStatus { connected: false, ..base },
+        };
+        ctx.add(s, VID, m.pid);
     }
-    let s = match found {
-        Some((level, charging, full)) => DeviceStatus { percent: level, charging, full, ..base },
-        None => DeviceStatus { connected: false, ..base },
-    };
-    ctx.add(s, VID, PID);
 }
 
 #[cfg(test)]
@@ -295,24 +310,34 @@ mod tests {
     use super::*;
 
     fn rx(p: &[u8]) -> [u8; 64] {
-        frame(p)
+        frame(PRO_X_2, p)
+    }
+
+    #[test]
+    fn addressed_frames() {
+        // HeadsetControl's G522: 50 23, then length, flags and the payload.
+        assert_eq!(direct(ADDRESSED, 0, 0, &[0x00, 0x03])[..8], [0x50, 0x23, 0x05, 0x00, 0x00, 0x01, 0x00, 0x03]);
+        let r = frame(ADDRESSED, &[0x00, 0x01, 0x03, 0x00, 0x00]);
+        assert_eq!(payload(ADDRESSED, &r).and_then(|p| direct_reply(p, 0)), Some(vec![0x03, 0x00, 0x00]));
+        assert_eq!(payload(PRO_X_2, &r), None);
+        assert_eq!(payload(ADDRESSED, &[0x50, 0x23, 0x40, 0x00]), None);
     }
 
     #[test]
     fn frames() {
         // Root.getFeature(0003): 51 05 00 00 01 00 03
-        assert_eq!(direct(0, 0, &[0x00, 0x03])[..7], [0x51, 0x05, 0x00, 0x00, 0x01, 0x00, 0x03]);
+        assert_eq!(direct(PRO_X_2, 0, 0, &[0x00, 0x03])[..7], [0x51, 0x05, 0x00, 0x00, 0x01, 0x00, 0x03]);
         // Through bridge 3, headset Root.getFeature(0104): sub-message 00 00 01 01 04 (5 bytes).
-        assert_eq!(bridged(3, 0, 0, &[0x01, 0x04])[..12], [0x51, 0x0A, 0x00, 0x03, 0x11, 0x00, 0x05, 0x00, 0x00, 0x01, 0x01, 0x04]);
-        assert_eq!(payload(&rx(&[0x00, 0x01, 0x03, 0x00, 0x00])), Some(&[0x00, 0x01, 0x03, 0x00, 0x00][..]));
-        assert_eq!(payload(&[0x50, 0x02, 0x00, 0x00]), None);
+        assert_eq!(bridged(PRO_X_2, 3, 0, 0, &[0x01, 0x04])[..12], [0x51, 0x0A, 0x00, 0x03, 0x11, 0x00, 0x05, 0x00, 0x00, 0x01, 0x01, 0x04]);
+        assert_eq!(payload(PRO_X_2, &rx(&[0x00, 0x01, 0x03, 0x00, 0x00])), Some(&[0x00, 0x01, 0x03, 0x00, 0x00][..]));
+        assert_eq!(payload(PRO_X_2, &[0x50, 0x02, 0x00, 0x00]), None);
     }
 
     #[test]
     fn direct_replies() {
         // Root answers the bridge index (3), as in Solaar's dump of a PRO X 2.
         let r = rx(&[0x00, 0x01, 0x03, 0x00, 0x00]);
-        assert_eq!(payload(&r).and_then(|p| direct_reply(p, 0)), Some(vec![0x03, 0x00, 0x00]));
+        assert_eq!(payload(PRO_X_2, &r).and_then(|p| direct_reply(p, 0)), Some(vec![0x03, 0x00, 0x00]));
     }
 
     #[test]
