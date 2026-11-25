@@ -321,6 +321,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | BETOP BTP-KP70A controller | X-input dongle `20BC:5130` (protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after BETOP's client, and [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT; untested here, [#212](../../issues/212)) |
 | AJAZZ AJ159P | Receiver `249A:5C2F` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an AJ179 V2 MAX on this receiver, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here on an AJ159P, [#216](../../issues/216)) |
 | IO Airox | Receiver `249A:5C2F`, shared with the AJAZZ AJ159P (vendor collection `FF01:0010` with the same 33-byte reports; protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#236](../../issues/236)) |
+| Ninjutso Sora V3 | Receiver `093A:EB02` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, and [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, verified on a Ninjutso Ten Air there; untested here on a Sora V3, [#198](../../issues/198)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -375,7 +376,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | MCHOSE G11 headset | `3554:FD01` | No documented battery query for its dongle; commands are not guessed | [#213](../../issues/213) |
 | Bloody R72 Pro | — | No documented protocol; the documented Bloody protocol is for other models | [#211](../../issues/211) |
 | HyperX Pulsefire Haste 2 S | `03F0:0BB8` | No documented battery protocol for this mouse | [#201](../../issues/201) |
-| Ninjutso Sora V3 | `093A:EB02` | No documented protocol for this receiver | [#198](../../issues/198) |
 | K68 keyboard (Ziyoulang) | `1EA7:0002` | No documented protocol | [#196](../../issues/196) |
 | AULA Kunlun X5 | `38A6:28F9` | Not among the documented AULA ids; commands are not guessed | [#194](../../issues/194) |
 | HATOR Rockfall 3 Wireless | `379A:0300` | No documented battery read for this keyboard's dongle; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#221](../../issues/221) |
