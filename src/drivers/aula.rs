@@ -23,6 +23,11 @@
 //! never answered is asked less and less often once it has stayed silent for 5 minutes (5, 10, 20,
 //! 40 minutes, then hourly). While a keyboard that has answered sleeps, the app shows it asleep
 //! with its last level; it is then asked at most every ASLEEP_QUERY_EVERY.
+//!
+//! Royal Kludge S98-ES on the Bytech "916" receiver 258A:0150 (issue #195): the same exchange
+//! (`13 4A 01`, answered `13 4A 01 00 02 LL ST`) on FF02:0002, as documented by BrimDeck (Apache-2.0,
+//! github.com/MoFeng2223/BrimDeck, src/BrimDeck.Core/Brands/Bytech916.cs, from GravaStar's 1khub, which
+//! lists this receiver). Other makers use the id too. Not tested on hardware by this project.
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
@@ -31,7 +36,7 @@ use crate::device::{DeviceKind, DeviceStatus, PollContext};
 use crate::hid::{self, HidColl, HidDev};
 use crate::util::{Deadline, hex4};
 
-const RECEIVERS: [(u16, u16); 3] = [(0x3554, 0xFA09), (0x3554, 0xFB40), (0x41E4, 0x2001)];
+const RECEIVERS: [(u16, u16); 4] = [(0x3554, 0xFA09), (0x3554, 0xFB40), (0x41E4, 0x2001), (0x258A, 0x0150)];
 const REPORT: u8 = 0x13;
 const CMD_BATTERY: u8 = 0x4A;
 const LEN: usize = 20;
@@ -133,6 +138,8 @@ fn name(c: &HidColl, vid: u16) -> String {
         p.to_string()
     } else if vid == 0x41E4 || p.contains("MCHOSE") {
         "MCHOSE wireless keyboard".into()
+    } else if vid == 0x258A {
+        "Wireless keyboard".into() // the receiver is shared by several makers
     } else {
         "AULA wireless keyboard".into()
     }
@@ -217,6 +224,15 @@ mod tests {
         // AULA: 01 on battery, 10 with the cable in.
         assert_eq!(decode(&reply(0x4A, 0x00, 0x00, 76, 0x01, true)), Some((76, false)));
         assert_eq!(decode(&reply(0xCA, 0x00, 0x00, 54, 0x10, true)), Some((54, true)));
+        // Bytech 916 receiver (258A:0150): 13 4A 01 00 02 LL ST, with or without the sum.
+        for with_sum in [true, false] {
+            let mut r = reply(0x4A, 0x01, 0x00, 81, 0x10, false);
+            r[4] = 0x02;
+            if with_sum {
+                r[19] = sum(&r[..19]);
+            }
+            assert_eq!(decode(&r), Some((81, true)));
+        }
         // MCHOSE single-packet frame with the trailer left at 0.
         assert_eq!(decode(&reply(0x4A, 0x01, 0x00, 90, 0x00, false)), Some((90, false)));
     }

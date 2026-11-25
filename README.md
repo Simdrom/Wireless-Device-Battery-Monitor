@@ -306,6 +306,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Redragon K1NG 4K PRO (M916 PRO 4K) | Receiver `3554:F54F`, shared with the Machenike L7 Air 4K (CompX report 8; id and protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#46](../../issues/46)) |
 | Dark Project Nexus | Receiver `3554:F53E` with the collections of the CompX receivers above (CompX report 8, as [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, sends it to every `3554` mouse receiver; untested here, [#52](../../issues/52)) |
 | "2.4G Wireless Receiver" mice (Areson) | Mice on `25A7:FA7C`, e.g. Redragon M693, Fantech Helios Go XD5 (the M913 receiver's read with the level in whole percent; protocol from [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT, and [redragon-mouse-linux](https://github.com/rajchauhan28/redragon-mouse-linux); untested here, [#225](../../issues/225)) |
+| Royal Kludge S98-ES | 2.4 GHz receiver `258A:0150` (the "BY" keyboards' battery read; protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after GravaStar's 1khub; untested here, [#195](../../issues/195)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -372,7 +373,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | HyperX Pulsefire Haste 2 S | `03F0:0BB8` | No documented battery protocol for this mouse | [#201](../../issues/201) |
 | Ninjutso Sora V3 | `093A:EB02` | No documented protocol for this receiver | [#198](../../issues/198) |
 | K68 keyboard (Ziyoulang) | `1EA7:0002` | No documented protocol | [#196](../../issues/196) |
-| Royal Kludge S98-ES | `258A:0150` | No documented protocol for this receiver. Over Bluetooth it works when Windows shows the level. | [#195](../../issues/195) |
 | AULA Kunlun X5 | `38A6:28F9` | Not among the documented AULA ids; commands are not guessed | [#194](../../issues/194) |
 | MCHOSE L7 Ultra+ | `5253:1020` | No documented protocol for this `5253` receiver | [#192](../../issues/192) |
 | HATOR Rockfall 3 Wireless | `379A:0300` | No documented battery read for this keyboard's dongle; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#221](../../issues/221) |
