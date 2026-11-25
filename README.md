@@ -320,6 +320,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | AJAZZ AK820 MAX, AULA F87 Pro V2C | On the SONiX receiver `0C45:FEFC` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an F87 Pro V2C on this receiver; no charging state; untested here on an AK820 MAX, [#160](../../issues/160)) |
 | BETOP BTP-KP70A controller | X-input dongle `20BC:5130` (protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after BETOP's client, and [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT; untested here, [#212](../../issues/212)) |
 | AJAZZ AJ159P | Receiver `249A:5C2F` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an AJ179 V2 MAX on this receiver, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here on an AJ159P, [#216](../../issues/216)) |
+| IO Airox | Receiver `249A:5C2F`, shared with the AJAZZ AJ159P (vendor collection `FF01:0010` with the same 33-byte reports; protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#236](../../issues/236)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -387,7 +388,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | QCY H3 Pro | `3654:4A55` | Only audio and media keys over USB, no vendor channel. Over Bluetooth it works when Windows shows the level. | [#144](../../issues/144) |
 | SteelSeries Apex Pro Mini Wireless | `1038:1624` | No documented battery read for this keyboard; commands are not guessed | [#146](../../issues/146) |
 | Keychron K8 Pro (Bluetooth) | Bluetooth | Works whenever Windows shows its level in *Settings → Bluetooth & devices*; Keychron keyboards send no level otherwise | [#145](../../issues/145) |
-| IO Airox | `249A:5C2F` | No documented protocol for this receiver (shared with the AJAZZ AJ159P) | [#236](../../issues/236) |
 | Keychron Q1 Max | `320F:5088` | Keychron's stock firmware reports the battery only over Bluetooth (works there) | [#235](../../issues/235) |
 | Razer Kraken V3 Pro | `1532:052C` | Its dongle shows Windows only a media-keys collection, no vendor channel to ask | [#234](../../issues/234) |
 | Lenovo Legion M410 Wireless | `17EF:6197` | No documented battery protocol for this receiver; commands are not guessed | [#231](../../issues/231) |

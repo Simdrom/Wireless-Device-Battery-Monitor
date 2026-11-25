@@ -24,8 +24,9 @@ const LEN: usize = 32;
 const REPLY_MS: u64 = 500;
 
 /// Usage page and usage of the receiver's vendor collection, and the name when there is nothing better.
-const COLLECTIONS: [(u16, u16, &str); 1] = [
+const COLLECTIONS: [(u16, u16, &str); 2] = [
     (0x0001, 0x0000, "AJAZZ wireless mouse"), // AJAZZ AJ159P (#216)
+    (0xFF01, 0x0010, "IO Airox"),             // IO Airox (#236): the same reports on another usage page
 ];
 
 /// Report id 0 first; the checksum of an empty payload is 0.
