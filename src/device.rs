@@ -364,6 +364,7 @@ pub fn poll_hardware(ids: &[(u16, u16)]) -> Vec<DeviceStatus> {
     drivers::nzxt::poll(&mut ctx);
     drivers::keychron::poll(&mut ctx);
     drivers::keychron_nape::poll(&mut ctx);
+    drivers::keychron_8k::poll(&mut ctx);
     drivers::via_dongle::poll(&mut ctx);
     drivers::hyperx_flight::poll(&mut ctx); // tested on hardware (PR #93); before hyperx_legacy
     drivers::hyperx_legacy::poll(&mut ctx);
@@ -524,6 +525,7 @@ fn poll_with(colls: Vec<HidColl>) -> Vec<DeviceStatus> {
     drivers::nzxt::poll(&mut ctx);
     drivers::keychron::poll(&mut ctx);
     drivers::keychron_nape::poll(&mut ctx);
+    drivers::keychron_8k::poll(&mut ctx);
     drivers::via_dongle::poll(&mut ctx);
     drivers::hyperx_flight::poll(&mut ctx); // tested on hardware (PR #93); before hyperx_legacy
     drivers::hyperx_legacy::poll(&mut ctx);

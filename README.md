@@ -325,6 +325,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | AULA Kunlun X5 | Receiver `38A6:28F9` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, which lists this receiver, and [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#194](../../issues/194)) |
 | Rapoo VT7 Max | Receiver `24AE:1416`; the mouse pushes its level by itself, nothing is sent (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#249](../../issues/249)) |
 | Rapoo VT9PRO 4K | Receiver `24AE:1211`; listens for the status report Rapoo's older mice push, nothing is sent (report layout from [Device-Battery-Info](https://github.com/PyFlat/Device-Battery-Info), [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; expected for this receiver, untested, [#11](../../issues/11)) |
+| Keychron TurboLink 8K | Mice on the receiver `3434:D05A`, Keychron Launcher's "8k" status read (protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, and [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, checked on an M6 on another receiver there; untested here, [#45](../../issues/45)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -372,7 +373,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | HATOR Pulsar 3 Wireless | `379A:3907` | No documented protocol for HATOR's `379A` mouse receiver; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#73](../../issues/73) |
 | beyerdynamic MMX 200 Wireless | `2E50:002F` | No documented battery protocol for its dongle; its vendor channels are not guessed. Over Bluetooth it works when Windows shows the level. | [#40](../../issues/40) |
 | T87 keyboard | `056D:C077` | No documented protocol | [#44](../../issues/44) |
-| Keychron TurboLink 8K receiver | `3434:D05A` | Not among the documented Keychron receiver ids; which Launcher protocol it uses is not confirmed, so commands are not guessed | [#45](../../issues/45) |
 | AJAZZ NJ07 (Bluetooth LE) | — | Windows reads no battery level from it over Bluetooth; its 2.4 GHz dongle has not been reported yet | [#69](../../issues/69) |
 | VXE V1 (VGN Siren V1) headset | `10D6:0016` | The Actions-chip dongle's vendor channels are undocumented; no battery query is known. Over Bluetooth it works when Windows shows the level. | [#85](../../issues/85) |
 | MCHOSE G11 headset | `3554:FD01` | No documented battery query for its dongle; commands are not guessed | [#213](../../issues/213) |

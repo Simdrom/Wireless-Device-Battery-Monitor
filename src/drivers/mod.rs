@@ -41,6 +41,7 @@ pub mod hyperx_legacy;
 pub mod hyperx_stinger2;
 pub mod jabra;
 pub mod keychron;
+pub mod keychron_8k;
 pub mod keychron_nape;
 pub mod logitech;
 pub mod logitech_g321;
