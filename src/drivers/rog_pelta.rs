@@ -13,6 +13,11 @@
 //! The dongle also pushes events on the same collection (CC 12 0E wake / sleep, CC 12 09 level
 //! change); they are skipped while waiting for the answer. Only these two reads are sent; nothing
 //! that changes a setting (CC 51 .., CC 41 ..).
+//!
+//! ROG Delta II on its 2.4 GHz dongle (0B05:1AFA, issue #252): the same collection and the same two
+//! reads, as documented by TaskbarVitals (GPL-3.0, github.com/symNistaken/TaskbarVitals,
+//! src/drivers/rog.cpp) and BrimDeck (Apache-2.0, github.com/MoFeng2223/BrimDeck,
+//! src/BrimDeck.Core/DeviceProtocols.cs). Not tested on hardware by this project.
 use crate::device::{DeviceKind, DeviceStatus, PollContext};
 use crate::hid::{HidColl, HidDev};
 use crate::util::Deadline;
@@ -20,7 +25,21 @@ use crate::util::Deadline;
 const VID: u16 = 0x0B05;
 const DONGLE: u16 = 0x1B84;
 const CABLE: u16 = 0x1B82;
-const KEY: &str = "rog:pelta";
+const DELTA2: u16 = 0x1AFA;
+
+struct Model {
+    pid: u16,
+    name: &'static str,
+    /// Dongle and cable of one headset share the key.
+    key: &'static str,
+}
+
+const MODELS: [Model; 3] = [
+    Model { pid: DONGLE, name: "ROG Pelta", key: "rog:pelta" },
+    Model { pid: CABLE, name: "ROG Pelta", key: "rog:pelta" },
+    Model { pid: DELTA2, name: "ROG Delta II", key: "rog:delta2" },
+];
+
 const REPORT: u8 = 0xCC;
 const CMD_STATUS: u8 = 0x07;
 const CMD_CHARGING: u8 = 0x08;
@@ -93,7 +112,8 @@ fn read(c: &HidColl) -> Option<Reading> {
 }
 
 pub fn poll(ctx: &mut PollContext) {
-    for pid in [DONGLE, CABLE] {
+    for m in &MODELS {
+        let pid = m.pid;
         if ctx.is_claimed(VID, pid) {
             continue;
         }
@@ -103,8 +123,8 @@ pub fn poll(ctx: &mut PollContext) {
         }
         let cable = pid == CABLE;
         let base = DeviceStatus {
-            key: KEY.into(),
-            name: "ROG Pelta".into(),
+            key: m.key.into(),
+            name: m.name.into(),
             kind: DeviceKind::Headset,
             via: if cable { "USB cable" } else { "2.4 GHz dongle" }.into(),
             hw: Some((VID, pid)),
@@ -117,7 +137,7 @@ pub fn poll(ctx: &mut PollContext) {
             None => DeviceStatus { connected: false, ..base },
         };
         // Dongle and cable both present (charging on the cable): one entry, the cable's reading wins.
-        if let Some(o) = ctx.out.iter_mut().find(|o| o.key == KEY) {
+        if let Some(o) = ctx.out.iter_mut().find(|o| o.key == m.key) {
             if s.connected && s.percent >= 0 {
                 *o = DeviceStatus { hw: o.hw, ..s };
             }

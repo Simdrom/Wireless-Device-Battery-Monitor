@@ -298,6 +298,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | ROCCAT | Syn Max Air headset over its 2.4 GHz receiver `1E7D:3A3F` (voltage curve; coarse level while charging) |
 | FNATIC | BOLT mouse over its receiver `2F0E:0203` (the USB cable `2F0E:0204` only marks it as charging); contributed by [Jere2201](https://github.com/Jere2201) in #48, from USBPcap captures, tested on hardware |
 | Attack Shark / Delux / Inphic | Mice (e.g. X1, X6 / R1, X11, IO Nova SE) on the Xenta 2.4 GHz receiver `1D57:FA60`, and the IO Nova SE on its USB cable (`1D57:2015`, same frames, from a USB capture in [#172](../../issues/172)) (protocol from [Attack Shark Battery KDE](https://gitlab.com/gabriel17166/Attack-Shark-Battery-KDE) and [attackshark-battery-windows](https://github.com/daeoxide/attackshark-battery-windows), both MIT); Delux M900 Pro and Inphic IN10 (R) MAX on the `1D57:FA65` receiver (frames from [omarchy-delux-m900](https://github.com/AeonArcHQ/omarchy-delux-m900), MIT, and the original project) |
+| ASUS ROG Delta II | Headset over its 2.4 GHz dongle `0B05:1AFA`, the same reads as the ROG Pelta (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, and [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#252](../../issues/252)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -393,7 +394,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Apple Watch Magnetic Charging Cable | `05AC:1392` | A charger: the watch does not report its battery to Windows through it | [#230](../../issues/230) |
 | KRUX Plasma Wireless | not reported | The receiver's id was not in the request; please comment with its VID:PID | [#239](../../issues/239) |
 | Ardor Gaming Edge Wireless | `3206:0881` | The dongle has only media keys, no vendor channel. Over Bluetooth it works when Windows shows the level. | [#244](../../issues/244) |
-| ASUS ROG Delta II (2.4 GHz) | `0B05:1AFA` | No documented battery read for its dongle; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#252](../../issues/252) |
 | Rapoo gaming receiver | `24AE:1416` | No documented protocol for this receiver (like the VT9PRO on `24AE:1211`); commands are not guessed | [#249](../../issues/249) |
 | H2015 Pro headset | `3206:0871` | No documented battery query for its dongle; commands are not guessed | [#242](../../issues/242) |
 
