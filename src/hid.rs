@@ -293,6 +293,22 @@ impl HidDev {
         }
     }
 
+    /// Writes one output report and waits up to `timeout_ms` for an input report that `parse`
+    /// accepts; reports queued before the request and unrelated ones are skipped.
+    pub fn ask<T>(&self, data: &[u8], timeout_ms: u64, parse: impl Fn(&[u8]) -> Option<T>) -> Option<T> {
+        self.flush();
+        if !self.write(data) {
+            return None;
+        }
+        let end = crate::util::Deadline::in_ms(timeout_ms);
+        while !end.passed() {
+            if let Some(v) = self.read(end.left_ms()).and_then(|r| parse(&r)) {
+                return Some(v);
+            }
+        }
+        None
+    }
+
     /// Discards queued input reports.
     pub fn flush(&self) {
         unsafe {
