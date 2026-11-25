@@ -310,6 +310,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Dark Project ALU87A Onionite Wireless | 2.4 GHz dongle `342D:E411`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a dongle that does not answer is not listed, [#122](../../issues/122)) |
 | "RS 8" / ELECFOX / Linky87 keyboards | `36B0:3005`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a keyboard that does not answer is not listed, [#135](../../issues/135)) |
 | Zoom75 Wireless (Meletrix) | `6D66:8888`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a keyboard that does not answer is not listed, [#42](../../issues/42)) |
+| MCHOSE L7 Ultra+ | Receiver `5253:1020`, also on the family's short feature report `11` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an M7 Ultra, and [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, confirmed on an A7 Ultra on this receiver; untested here on an L7 Ultra+, [#192](../../issues/192)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -374,7 +375,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Ninjutso Sora V3 | `093A:EB02` | No documented protocol for this receiver | [#198](../../issues/198) |
 | K68 keyboard (Ziyoulang) | `1EA7:0002` | No documented protocol | [#196](../../issues/196) |
 | AULA Kunlun X5 | `38A6:28F9` | Not among the documented AULA ids; commands are not guessed | [#194](../../issues/194) |
-| MCHOSE L7 Ultra+ | `5253:1020` | No documented protocol for this `5253` receiver | [#192](../../issues/192) |
 | HATOR Rockfall 3 Wireless | `379A:0300` | No documented battery read for this keyboard's dongle; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#221](../../issues/221) |
 | HELLYBERRY HM47 | `379A:A202` | No documented protocol for this `379A` receiver; commands are not guessed | [#220](../../issues/220) |
 | Corsair K63 Wireless | `1B1C:1B50` | No documented battery protocol for this keyboard's receiver; commands are not guessed | [#163](../../issues/163) |

@@ -16,6 +16,11 @@
 //! then reported asleep (the app keeps its last level) and asked again after ASLEEP_QUERY_EVERY.
 //! The request has to be sent again for every read attempt.
 //!
+//! Some receivers answer on the family's short report 11 instead of 12 (same bytes): HaloBattery (MIT,
+//! github.com/HeyOkay/HaloBattery, providers/mchose.py, M7 Ultra on 5253:1020) and MouseDock (MIT,
+//! github.com/late-autumn-gif/mousedock, docs/A7-ULTRA-M2-V5-HE.md, A7 Ultra on 5253:1020) read it
+//! there, so 11 is asked when 12 gives nothing (L7 Ultra+, issue #192).
+//!
 //! The same protocol runs on MCHOSE's Realtek ODM receivers with VID 3837 (original C++ BatteryHub,
 //! mchose.cpp: A5 V2 Ultra 3837:100C verified there, K7 Ultra 3837:1001, A7 V2 Ultra+ 3837:100B,
 //! 100A, 1012). Only those product ids are asked: other 3837 products (G3 V2, keyboards, headsets)
@@ -32,7 +37,8 @@ const VID: u16 = 0x5253;
 const VID_REALTEK: u16 = 0x3837;
 const REALTEK_PIDS: [u16; 5] = [0x100C, 0x100B, 0x100A, 0x1001, 0x1012];
 const REALTEK_FIELDS: [u16; 2] = [0x41E4, VID_REALTEK];
-const REPORT: u8 = 0x12;
+/// Feature reports, in the order they are tried.
+const REPORTS: [u8; 2] = [0x12, 0x11];
 const CMD_STATUS: u8 = 0x06;
 const ATTEMPTS: usize = 5;
 const ASLEEP_QUERY_EVERY: Duration = Duration::from_secs(60);
@@ -44,9 +50,9 @@ pub enum Status {
     Asleep,
 }
 
-pub fn request(len: usize) -> Vec<u8> {
+pub fn request(report: u8, len: usize) -> Vec<u8> {
     let mut r = vec![0xFF; len.max(2)];
-    r[0] = REPORT;
+    r[0] = report;
     r[1] = CMD_STATUS ^ 0xFF;
     r
 }
@@ -58,7 +64,7 @@ pub fn decode(r: &[u8]) -> Option<Status> {
 
 /// Like decode, accepting any of `fields` as the payload's vid field.
 pub fn decode_fields(r: &[u8], fields: &[u16]) -> Option<Status> {
-    if r.len() < 13 || r[0] != REPORT || r[1] != CMD_STATUS ^ 0xFF {
+    if r.len() < 13 || !REPORTS.contains(&r[0]) || r[1] != CMD_STATUS ^ 0xFF {
         return None;
     }
     let p: Vec<u8> = r[2..13].iter().map(|b| b ^ 0xFF).collect();
@@ -74,7 +80,11 @@ pub fn decode_fields(r: &[u8], fields: &[u16]) -> Option<Status> {
 
 fn query(c: &HidColl, fields: &[u16]) -> Option<Status> {
     let d = HidDev::open_feature_only(c)?;
-    let req = request(c.feat_len() as usize);
+    REPORTS.iter().find_map(|&report| query_report(&d, report, c.feat_len() as usize, fields))
+}
+
+fn query_report(d: &HidDev, report: u8, len: usize, fields: &[u16]) -> Option<Status> {
+    let req = request(report, len);
     let mut best = None;
     for attempt in 0..ATTEMPTS {
         if attempt > 0 {
@@ -84,7 +94,7 @@ fn query(c: &HidColl, fields: &[u16]) -> Option<Status> {
             break;
         }
         sleep_ms(120);
-        match d.get_feature(REPORT).and_then(|r| decode_fields(&r, fields)) {
+        match d.get_feature(report).and_then(|r| decode_fields(&r, fields)) {
             Some(s @ Status::Reading(..)) => return Some(s),
             Some(Status::Asleep) => best = Some(Status::Asleep),
             None => {}
@@ -144,7 +154,7 @@ mod tests {
     use super::*;
 
     fn reply(payload: &[u8]) -> Vec<u8> {
-        let mut r = vec![REPORT, 0xF9];
+        let mut r = vec![REPORTS[0], 0xF9];
         r.extend(payload.iter().map(|b| b ^ 0xFF));
         r.resize(65, 0xFF);
         r
@@ -152,7 +162,7 @@ mod tests {
 
     #[test]
     fn request_frame() {
-        let r = request(65);
+        let r = request(0x12, 65);
         assert_eq!(r.len(), 65);
         assert_eq!(&r[..3], &[0x12, 0xF9, 0xFF]);
         assert!(r[2..].iter().all(|&b| b == 0xFF));
@@ -166,6 +176,14 @@ mod tests {
         // On the cable: flags 00, charging.
         let cable = [0x53, 0x52, 0x20, 0x10, 0x01, 0x02, 0x03, 0x04, 0x00, 95, 1];
         assert_eq!(decode(&reply(&cable)), Some(Status::Reading(95, true, true)));
+    }
+
+    #[test]
+    fn short_report() {
+        assert_eq!(&request(0x11, 65)[..3], &[0x11, 0xF9, 0xFF]);
+        let mut r = reply(&[0x53, 0x52, 0x11, 0x00, 0x01, 0x02, 0x03, 0x04, 0x09, 64, 0]);
+        r[0] = 0x11;
+        assert_eq!(decode(&r), Some(Status::Reading(64, false, false)));
     }
 
     #[test]
