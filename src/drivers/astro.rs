@@ -1,14 +1,18 @@
-//! Logitech ASTRO A50 Gen 5 on its 046D:0B1C base station.
+//! Logitech ASTRO A50 Gen 5 on its 046D:0B1C base station and A50 X on 046D:0B0B.
 //!
 //! Battery-only request on the vendor collection FF32:0074 (interface 8), with 64-byte reports
 //! and report ID 02: `02 0C 03 00 06 0C ...`. The response carries percent in byte 6 and charging
 //! in byte 8. Protocol validated by the original C++ BatteryHub and HeadsetControl. Read-only.
+//!
+//! The A50 X (issue #105) answers the same request on the same collection: TaskbarVitals (GPL-3.0,
+//! github.com/symNistaken/TaskbarVitals, src/drivers/astro.cpp), tested on an A50 X there.
 use crate::device::{DeviceKind, DeviceStatus, PollContext};
 use crate::hid::{HidColl, HidDev};
 use crate::util::Deadline;
 
 const VID: u16 = 0x046D;
-const PID: u16 = 0x0B1C;
+/// Base stations: product id, entry key, name.
+const STATIONS: [(u16, &str, &str); 2] = [(0x0B1C, "astro:0b1c", "Logitech Astro A50 Gen 5"), (0x0B0B, "astro:0b0b", "Logitech Astro A50 X")];
 const LEN: usize = 64;
 const REPLY_MS: u64 = 1000;
 
@@ -51,32 +55,35 @@ fn query(c: &HidColl) -> Option<(i32, bool)> {
 }
 
 pub fn poll(ctx: &mut PollContext) {
-    if ctx.is_claimed(VID, PID) {
-        return;
+    for (pid, key, name) in STATIONS {
+        if ctx.is_claimed(VID, pid) {
+            continue;
+        }
+        let colls =
+            ctx.find(VID, pid, |c| c.page() == 0xFF32 && c.usage() == 0x0074 && c.iface == 8 && c.in_len() as usize == LEN && c.out_len() as usize == LEN);
+        if colls.is_empty() {
+            continue;
+        }
+        // Keep the generic Logitech driver from probing this recognised Astro collection.
+        ctx.claim(VID, pid);
+        let Some((percent, charging)) = colls.iter().find_map(query) else {
+            continue;
+        };
+        ctx.add(
+            DeviceStatus {
+                key: key.into(),
+                name: name.into(),
+                kind: DeviceKind::Headset,
+                via: "USB base station".into(),
+                percent,
+                charging,
+                grace_sec: 1800,
+                ..Default::default()
+            },
+            VID,
+            pid,
+        );
     }
-    let colls = ctx.find(VID, PID, |c| c.page() == 0xFF32 && c.usage() == 0x0074 && c.iface == 8 && c.in_len() as usize == LEN && c.out_len() as usize == LEN);
-    if colls.is_empty() {
-        return;
-    }
-    // Keep the generic Logitech driver from probing this recognised Astro collection.
-    ctx.claim(VID, PID);
-    let Some((percent, charging)) = colls.iter().find_map(query) else {
-        return;
-    };
-    ctx.add(
-        DeviceStatus {
-            key: "astro:0b1c".into(),
-            name: "Logitech Astro A50 Gen 5".into(),
-            kind: DeviceKind::Headset,
-            via: "USB base station".into(),
-            percent,
-            charging,
-            grace_sec: 1800,
-            ..Default::default()
-        },
-        VID,
-        PID,
-    );
 }
 
 #[cfg(test)]
