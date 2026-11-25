@@ -304,6 +304,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | ATK ZERO and other mice on the "8k NANO dongle-L" | `373B:11FE` (CompX report 8; confirmed on an ATK A9 Ultra V2 by [Joule](https://github.com/DillanCidral/Joule), also in [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#204](../../issues/204)) |
 | Attack Shark MEGA B2 TMR | Receiver `3554:F517`, shared with the Scyrox V8S and EWEADN Z7 (CompX report 8; id and protocol from [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT, and [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT; untested here, [#223](../../issues/223)) |
 | Redragon K1NG 4K PRO (M916 PRO 4K) | Receiver `3554:F54F`, shared with the Machenike L7 Air 4K (CompX report 8; id and protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#46](../../issues/46)) |
+| Dark Project Nexus | Receiver `3554:F53E` with the collections of the CompX receivers above (CompX report 8, as [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, sends it to every `3554` mouse receiver; untested here, [#52](../../issues/52)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -342,7 +343,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Dark Project ALU87A Onionite Wireless ("ONIONITE87_2.4G") | `342D:E411` | No documented protocol for this dongle; its raw HID channel is not known to answer a battery query, so commands are not guessed | [#122](../../issues/122) |
 | Bloody R36 Ultra | `1956:3001` | The documented Bloody protocol does not answer on this mouse | [#24](../../issues/24) |
 | ThinkPad X1 Presenter Mouse, ProtoArc EM11 NL (Bluetooth) | Bluetooth | Windows reports no battery level for them over Bluetooth; their 2.4 GHz receivers are not identified yet | [#49](../../issues/49), [#50](../../issues/50) |
-| Dark Project Nexus | `3554:F53E` | Not among the documented CompX (Pulsar / Kysona) ids; commands are not guessed | [#52](../../issues/52) |
 | Glorious GHS Wireless InfinitePlay headset | `3794:D005` | No documented battery protocol for its dongle | [#54](../../issues/54) |
 | Keychron Q6 HE (and other Keychron QMK keyboards on the cable) | `3434:0B60` | Keychron's stock firmware reports the battery only over Bluetooth (works there) | [#59](../../issues/59) |
 | Corsair Sabre v3 Pro Wireless (Slipstream V2 receiver) | `1B1C:2B42` | The only documented battery read ([OpenLinkHub](https://github.com/jurkovic-nikola/OpenLinkHub)) first logs in and switches the receiver to software mode, which takes over the mouse's onboard settings; BatteryHub only reads | [#98](../../issues/98) |

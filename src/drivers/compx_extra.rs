@@ -52,7 +52,7 @@ struct Product {
     cable: bool,
 }
 
-const PRODUCTS: [Product; 14] = [
+const PRODUCTS: [Product; 15] = [
     Product { vid: 0x3554, pid: 0xF5F7, name: "Scyrox V6 / V8", key: "scyrox:v6v8", cable: false },
     Product { vid: 0x3554, pid: 0xF5F6, name: "Scyrox V6 / V8", key: "scyrox:v6v8", cable: true },
     Product { vid: 0x373B, pid: 0x101B, name: "ATK 8K mouse", key: "compx:373b:101b", cable: false },
@@ -76,6 +76,9 @@ const PRODUCTS: [Product; 14] = [
     // Redragon K1NG 4K PRO (#46); Machenike's L7 Air 4K driver lists the same receiver, read with this
     // frame by BrimDeck (Apache-2.0, src/BrimDeck.Core/DeviceProtocols.cs, CompxOfficial).
     Product { vid: 0x3554, pid: 0xF54F, name: "Wireless mouse", key: "compx:3554:f54f", cable: false },
+    // Dark Project Nexus (#52): the same collections; TaskbarVitals (GPL-3.0, src/drivers/kysona.cpp)
+    // sends this frame to every 3554 receiver but the keyboard ones.
+    Product { vid: 0x3554, pid: 0xF53E, name: "Dark Project Nexus", key: "compx:3554:f53e", cable: false },
 ];
 
 #[derive(Debug, PartialEq, Eq)]
