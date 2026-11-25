@@ -309,6 +309,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Royal Kludge S98-ES | 2.4 GHz receiver `258A:0150` (the "BY" keyboards' battery read; protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after GravaStar's 1khub; untested here, [#195](../../issues/195)) |
 | Dark Project ALU87A Onionite Wireless | 2.4 GHz dongle `342D:E411`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a dongle that does not answer is not listed, [#122](../../issues/122)) |
 | "RS 8" / ELECFOX / Linky87 keyboards | `36B0:3005`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a keyboard that does not answer is not listed, [#135](../../issues/135)) |
+| Zoom75 Wireless (Meletrix) | `6D66:8888`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a keyboard that does not answer is not listed, [#42](../../issues/42)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -357,7 +358,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | EKSA E1000 WT headset | `3206:109D` | No documented battery protocol for its dongle; commands are not guessed | [#76](../../issues/76) |
 | HATOR Pulsar 3 Wireless | `379A:3907` | No documented protocol for HATOR's `379A` mouse receiver; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#73](../../issues/73) |
 | beyerdynamic MMX 200 Wireless | `2E50:002F` | No documented battery protocol for its dongle; its vendor channels are not guessed. Over Bluetooth it works when Windows shows the level. | [#40](../../issues/40) |
-| Zoom75 Wireless (Meletrix) | `6D66:8888` | Its VIA raw HID channel has no documented battery command. Over Bluetooth it works when Windows shows the level. | [#42](../../issues/42) |
 | T87 keyboard | `056D:C077` | No documented protocol | [#44](../../issues/44) |
 | Keychron TurboLink 8K receiver | `3434:D05A` | Not among the documented Keychron receiver ids; which Launcher protocol it uses is not confirmed, so commands are not guessed | [#45](../../issues/45) |
 | PIAO-2.4G mouse | `372E:1014` | No documented protocol for this `372E` receiver | [#47](../../issues/47) |
