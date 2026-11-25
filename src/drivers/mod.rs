@@ -33,6 +33,7 @@ pub mod hyperx_cloud2;
 pub mod hyperx_core;
 pub mod hyperx_flight;
 pub mod hyperx_legacy;
+pub mod hyperx_stinger2;
 pub mod jabra;
 pub mod keychron;
 pub mod keychron_nape;
