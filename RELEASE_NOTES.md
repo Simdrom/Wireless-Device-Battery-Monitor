@@ -1,4 +1,4 @@
-# BatteryHub v1.7.4 (Rust)
+# BatteryHub v1.7.5 (Rust)
 
 An ultra-lightweight Rust implementation of BatteryHub for Windows, a recode of [krisgfx9/Wireless-Device-Battery-Monitor](https://github.com/krisgfx9/Wireless-Device-Battery-Monitor). All credit for the original idea, look and device protocols goes to the original project.
 
@@ -6,10 +6,14 @@ An ultra-lightweight Rust implementation of BatteryHub for Windows, a recode of 
 
 | File | |
 |---|---|
-| `BatteryHub-Taskbar-Setup-v1.7.4.exe` | Setup: Install / Update / Uninstall |
+| `BatteryHub-Taskbar-Setup-v1.7.5.exe` | Setup: Install / Update / Uninstall |
 | `SHA256SUMS.txt` | Checksum |
 
 Already installed? Use *Check for updates...* in the right-click menu (v1.1 and later), or run the new setup and click **Update**. Your settings and autostart choice are kept.
+
+## New in v1.7.5
+
+- **New devices:** many more wireless devices supported (mice, keyboards, headsets and controllers), including Logitech ASTRO A50 X, Logitech G325 LIGHTSPEED, Razer BlackShark V3 Pro, HyperX Cloud Stinger 2 Wireless, ASUS ROG Delta II, Keychron mice on the TurboLink 8K receiver, Rapoo VT7 Max and VT9PRO 4K, AULA Kunlun X5, Ninjutso Sora V3, AJAZZ AK820 MAX and AJ159P, Dark Project Nexus and ALU87A Onionite, Redragon K1NG 4K PRO, MCHOSE X9 and others.
 
 ## New in v1.7.4
 
