@@ -313,6 +313,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | MCHOSE L7 Ultra+ | Receiver `5253:1020`, also on the family's short feature report `11` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an M7 Ultra, and [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, confirmed on an A7 Ultra on this receiver; untested here on an L7 Ultra+, [#192](../../issues/192)) |
 | HyperX Cloud Stinger 2 Wireless | Over its 2.4 GHz dongle `03F0:0D93` (protocol from [HyperHeadset](https://github.com/LennardKittner/HyperHeadset), MIT, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#203](../../issues/203)) |
 | Logitech G325 LIGHTSPEED | Headset over its 2.4 GHz receiver `046D:0B21`, Centurion transport with the later models' frame prefix (protocol from [HeadsetControl](https://github.com/Sapd/HeadsetControl), GPL-3.0, [Solaar](https://github.com/pwr-Solaar/Solaar) and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#206](../../issues/206)) |
+| Machenike L7 Mix (L7 Arctic) | Receiver `248A:FF4C` or USB cable `248A:FF4E` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, tested on an L7 Arctic there; untested here, [#207](../../issues/207)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -370,7 +371,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | MCHOSE G11 headset | `3554:FD01` | No documented battery query for its dongle; commands are not guessed | [#213](../../issues/213) |
 | BTP-KP70A controller (X-input dongle) | `20BC:5130` | The dongle shows Windows an Xbox pad that reports no level; its vendor channel is undocumented | [#212](../../issues/212) |
 | Bloody R72 Pro | — | No documented protocol; the documented Bloody protocol is for other models | [#211](../../issues/211) |
-| L7 Mix mouse | `248A:FF4C` | No documented protocol for this receiver | [#207](../../issues/207) |
 | HyperX Pulsefire Haste 2 S | `03F0:0BB8` | No documented battery protocol for this mouse | [#201](../../issues/201) |
 | Ninjutso Sora V3 | `093A:EB02` | No documented protocol for this receiver | [#198](../../issues/198) |
 | K68 keyboard (Ziyoulang) | `1EA7:0002` | No documented protocol | [#196](../../issues/196) |

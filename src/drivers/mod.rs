@@ -41,6 +41,7 @@ pub mod logitech;
 pub mod logitech_g321;
 pub mod logitech_g533;
 pub mod logitech_prox2;
+pub mod machenike;
 pub mod mchose;
 pub mod mchose_g3;
 pub mod mchose_glw;
