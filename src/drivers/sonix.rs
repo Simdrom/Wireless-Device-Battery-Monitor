@@ -15,7 +15,8 @@
 //! keyboards on 05AC:024F (no FF60 collection on interface 3) are not touched.
 //!
 //! Dongles that TaskbarVitals (GPL-3.0, github.com/symNistaken/TaskbarVitals, src/drivers/sonix.cpp)
-//! lists for the same request, not confirmed on hardware there or here: 342D:E411 (#122).
+//! lists for the same request, not confirmed on hardware there or here: 342D:E411 (#122), 36B0:3005
+//! (#135).
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
@@ -33,12 +34,14 @@ struct Dongle {
     confirmed: bool,
 }
 
-const DONGLES: [Dongle; 4] = [
+const DONGLES: [Dongle; 5] = [
     Dongle { vid: 0x05AC, pid: 0x024F, iface: 3, confirmed: true },
     Dongle { vid: 0x0C45, pid: 0xFEFE, iface: 3, confirmed: true },
     Dongle { vid: 0x0C45, pid: 0xFDFD, iface: 3, confirmed: true },
     // Dark Project ALU87A Onionite (#122)
     Dongle { vid: 0x342D, pid: 0xE411, iface: 1, confirmed: false },
+    // "RS 8" / Linky87 / ELECFOX (#135)
+    Dongle { vid: 0x36B0, pid: 0x3005, iface: 1, confirmed: false },
 ];
 const SILENT_QUERY_EVERY: Duration = Duration::from_secs(10 * 60);
 const LEN: usize = 32;

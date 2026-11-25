@@ -308,6 +308,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | "2.4G Wireless Receiver" mice (Areson) | Mice on `25A7:FA7C`, e.g. Redragon M693, Fantech Helios Go XD5 (the M913 receiver's read with the level in whole percent; protocol from [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT, and [redragon-mouse-linux](https://github.com/rajchauhan28/redragon-mouse-linux); untested here, [#225](../../issues/225)) |
 | Royal Kludge S98-ES | 2.4 GHz receiver `258A:0150` (the "BY" keyboards' battery read; protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after GravaStar's 1khub; untested here, [#195](../../issues/195)) |
 | Dark Project ALU87A Onionite Wireless | 2.4 GHz dongle `342D:E411`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a dongle that does not answer is not listed, [#122](../../issues/122)) |
+| "RS 8" / ELECFOX / Linky87 keyboards | `36B0:3005`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a keyboard that does not answer is not listed, [#135](../../issues/135)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -335,7 +336,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Mojhon Storm / BIGBIG WON controller | `E2B7:122C` | XInput dongle that reports no battery level | [#8](../../issues/8) |
 | Rapoo VT9PRO 4K | `24AE:1211` | No documented protocol | [#11](../../issues/11) |
 | Edifier HECATE G5 Wireless | `35BB:A008` | No documented protocol for its headset dongle (the supported HECATE mice use other ids) | [#15](../../issues/15), [#131](../../issues/131) |
-| "RS 8" / ELECFOX keyboards on `36B0:3005` | `36B0:3005` | A VIA-firmware raw HID channel only; a battery read over it is documented only for other `36B0` firmware, so commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#135](../../issues/135) |
 | "2.4G Wireless Device" keyboard | `1A2C:7FFF` | No documented protocol (not the Semico `AA 55 CC 33` layout of the `1A2C:8FFF` keyboards). Over Bluetooth it works when Windows shows the level. | [#136](../../issues/136) |
 | Maono DM40 / DM40 Pro wireless microphone (receiver) | `352F:0405` | The receiver only has a consumer-control collection with 65-byte reports; the battery level is read by Maono's own app over an undocumented protocol, so commands are not guessed. | [#140](../../issues/140) |
 | Royal Kludge RK96 (2.4G Wireless Receiver) | `25A7:FA70` | No documented protocol for this receiver (the RK MG6 Pro driver is for `2E3C` ids). Over Bluetooth it works when Windows shows the level. | [#137](../../issues/137) |
