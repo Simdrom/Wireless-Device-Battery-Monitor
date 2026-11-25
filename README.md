@@ -303,6 +303,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Razer BlackShark V3 Pro | Headset over its HyperSpeed dongle `1532:0577` or USB cable `1532:0576`; the same battery request as the BlackShark V3 (protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after OpenRazer; untested here, [#199](../../issues/199)) |
 | ATK ZERO and other mice on the "8k NANO dongle-L" | `373B:11FE` (CompX report 8; confirmed on an ATK A9 Ultra V2 by [Joule](https://github.com/DillanCidral/Joule), also in [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#204](../../issues/204)) |
 | Attack Shark MEGA B2 TMR | Receiver `3554:F517`, shared with the Scyrox V8S and EWEADN Z7 (CompX report 8; id and protocol from [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT, and [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT; untested here, [#223](../../issues/223)) |
+| Redragon K1NG 4K PRO (M916 PRO 4K) | Receiver `3554:F54F`, shared with the Machenike L7 Air 4K (CompX report 8; id and protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#46](../../issues/46)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -357,7 +358,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Zoom75 Wireless (Meletrix) | `6D66:8888` | Its VIA raw HID channel has no documented battery command. Over Bluetooth it works when Windows shows the level. | [#42](../../issues/42) |
 | T87 keyboard | `056D:C077` | No documented protocol | [#44](../../issues/44) |
 | Keychron TurboLink 8K receiver | `3434:D05A` | Not among the documented Keychron receiver ids; which Launcher protocol it uses is not confirmed, so commands are not guessed | [#45](../../issues/45) |
-| Redragon K1NG 4K PRO (M916 PRO 4K) | `3554:F54F` | Not among the documented CompX (Pulsar / Kysona) ids; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#46](../../issues/46) |
 | PIAO-2.4G mouse | `372E:1014` | No documented protocol for this `372E` receiver | [#47](../../issues/47) |
 | AJAZZ NJ07 (Bluetooth LE) | — | Windows reads no battery level from it over Bluetooth; its 2.4 GHz dongle has not been reported yet | [#69](../../issues/69) |
 | VXE V1 (VGN Siren V1) headset | `10D6:0016` | The Actions-chip dongle's vendor channels are undocumented; no battery query is known. Over Bluetooth it works when Windows shows the level. | [#85](../../issues/85) |
