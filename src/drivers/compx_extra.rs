@@ -52,7 +52,7 @@ struct Product {
     cable: bool,
 }
 
-const PRODUCTS: [Product; 11] = [
+const PRODUCTS: [Product; 12] = [
     Product { vid: 0x3554, pid: 0xF5F7, name: "Scyrox V6 / V8", key: "scyrox:v6v8", cable: false },
     Product { vid: 0x3554, pid: 0xF5F6, name: "Scyrox V6 / V8", key: "scyrox:v6v8", cable: true },
     Product { vid: 0x373B, pid: 0x101B, name: "ATK 8K mouse", key: "compx:373b:101b", cable: false },
@@ -67,6 +67,9 @@ const PRODUCTS: [Product; 11] = [
     // Ardor Gaming Phantom Pro (#181) and Phantom Pro V2 (#185): the same collections.
     Product { vid: 0x3554, pid: 0xF5C4, name: "Ardor Gaming Phantom Pro", key: "compx:3554:f5c4", cable: false },
     Product { vid: 0x3554, pid: 0xF52D, name: "Ardor Gaming Phantom Pro V2", key: "compx:3554:f52d", cable: false },
+    // "Wireless mouse 8k NANO dongle-L" (ATK ZERO, #204): Joule (github.com/DillanCidral/Joule,
+    // CompxProvider.cs) reads it with this frame, confirmed on an A9 Ultra V2; also in BatteryTray.
+    Product { vid: 0x373B, pid: 0x11FE, name: "ATK 8K mouse", key: "compx:373b:11fe", cable: false },
 ];
 
 #[derive(Debug, PartialEq, Eq)]

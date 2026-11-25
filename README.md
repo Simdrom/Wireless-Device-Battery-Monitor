@@ -301,6 +301,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | ASUS ROG Delta II | Headset over its 2.4 GHz dongle `0B05:1AFA`, the same reads as the ROG Pelta (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, and [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#252](../../issues/252)) |
 | Logitech ASTRO A50 X | USB base station `046D:0B0B`; the same read-only battery request as the A50 Gen 5 (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, tested on an A50 X there; untested here, [#105](../../issues/105)) |
 | Razer BlackShark V3 Pro | Headset over its HyperSpeed dongle `1532:0577` or USB cable `1532:0576`; the same battery request as the BlackShark V3 (protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after OpenRazer; untested here, [#199](../../issues/199)) |
+| ATK ZERO and other mice on the "8k NANO dongle-L" | `373B:11FE` (CompX report 8; confirmed on an ATK A9 Ultra V2 by [Joule](https://github.com/DillanCidral/Joule), also in [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#204](../../issues/204)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -365,7 +366,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Bloody R72 Pro | — | No documented protocol; the documented Bloody protocol is for other models | [#211](../../issues/211) |
 | L7 Mix mouse | `248A:FF4C` | No documented protocol for this receiver | [#207](../../issues/207) |
 | Logitech G325 LIGHTSPEED headset | `046D:0B21` | No documented battery read for this model (the PRO X 2 protocol is not confirmed on it); commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#206](../../issues/206) |
-| ATK ZERO | `373B:11FE` | Not among the documented ATK receiver ids; commands are not guessed | [#204](../../issues/204) |
 | HyperX Cloud Stinger 2 Wireless | not reported | The dongle's id was not in the request and no protocol for it has been checked; please comment with its VID:PID | [#203](../../issues/203) |
 | HyperX Pulsefire Haste 2 S | `03F0:0BB8` | No documented battery protocol for this mouse | [#201](../../issues/201) |
 | Ninjutso Sora V3 | `093A:EB02` | No documented protocol for this receiver | [#198](../../issues/198) |
