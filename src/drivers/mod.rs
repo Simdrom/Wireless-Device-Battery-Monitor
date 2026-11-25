@@ -10,6 +10,7 @@ pub mod atk_mercury;
 pub mod atk_serial;
 pub mod attackshark;
 pub mod aula;
+pub mod aula_hub;
 pub mod aula_mouse;
 pub mod barracuda_chroma;
 pub mod barracuda_x;

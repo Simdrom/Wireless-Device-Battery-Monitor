@@ -317,6 +317,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | DAREU EK75 Pro | Receiver `260D:0042` or USB cable `260D:0046` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, after DAREU's web driver, cable verified there; untested here, [#63](../../issues/63)) |
 | IPI PIAO mouse | "PIAO-2.4G" receiver `372E:1014` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, after hardware captures and IPI's web driver; untested here, [#47](../../issues/47)) |
 | MCHOSE X9 | Headset over its 2.4 GHz dongle `3837:6045` (protocol from [HeadsetControl](https://github.com/Sapd/HeadsetControl), GPL-3.0, after a capture of M HUB; no charging state; untested here, [#147](../../issues/147)) |
+| AJAZZ AK820 MAX, AULA F87 Pro V2C | On the SONiX receiver `0C45:FEFC` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an F87 Pro V2C on this receiver; no charging state; untested here on an AK820 MAX, [#160](../../issues/160)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -380,7 +381,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | HELLYBERRY HM47 | `379A:A202` | No documented protocol for this `379A` receiver; commands are not guessed | [#220](../../issues/220) |
 | Corsair K63 Wireless | `1B1C:1B50` | No documented battery protocol for this keyboard's receiver; commands are not guessed | [#163](../../issues/163) |
 | ASTRO A30 | `9886:0050` | No documented battery protocol for its dongle; commands are not guessed | [#162](../../issues/162) |
-| AJAZZ AK820 MAX on `0C45:FEFC` | `0C45:FEFC` | Not one of the documented SONiX dongle ids (the AK820 MAX on `05AC:024F` is supported); commands are not guessed | [#160](../../issues/160) |
 | Poly BT700 adapter | `047F:02E6` | Its vendor channel differs from the supported BT600 and no battery query is documented | [#159](../../issues/159) |
 | "GAMING HEADSET B100" | `1024:8087` | The dongle has only audio and media keys, no vendor channel. Over Bluetooth it works when Windows shows the level. | [#165](../../issues/165) |
 | RS322 ROX headset | `4C49:4255` | The dongle has only audio and media keys, no vendor channel. Over Bluetooth it works when Windows shows the level. | [#148](../../issues/148) |
