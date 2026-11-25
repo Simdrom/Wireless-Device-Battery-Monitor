@@ -14,6 +14,7 @@ pub mod aula_hub;
 pub mod aula_mouse;
 pub mod barracuda_chroma;
 pub mod barracuda_x;
+pub mod betop;
 pub mod blackshark;
 pub mod blackshark_v2pro;
 pub mod bluetooth;
