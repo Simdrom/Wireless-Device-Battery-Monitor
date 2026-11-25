@@ -15,6 +15,11 @@
 //! and records every report; the regular poll only reads what it recorded. Dongle and cable are
 //! tracked apart: with the headset on the cable the dongle stays plugged in but gets no replies. A query that gets no
 //! reply means the headset is off or out of range.
+//!
+//! BlackShark V3 Pro on its dongle (1532:0577, issue #199) or USB cable (0576): the same collection
+//! and battery request, as documented by BrimDeck (Apache-2.0, github.com/MoFeng2223/BrimDeck,
+//! src/BrimDeck.Core/Brands/RazerBlackSharkV3.cs, from OpenRazer #2567 / #2794 / #2838). Not tested
+//! on hardware by this project.
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
@@ -24,8 +29,8 @@ use crate::hid::{HidColl, HidDev};
 use crate::util::hex4;
 
 const VID: u16 = 0x1532;
-const DONGLE: u16 = 0x057A;
-const CABLE: u16 = 0x0579;
+/// Dongle, USB cable and name of each model.
+const MODELS: [(u16, u16, &str); 2] = [(0x057A, 0x0579, "Razer BlackShark V3"), (0x0577, 0x0576, "Razer BlackShark V3 Pro")];
 const QUERY_EVERY: Duration = Duration::from_secs(30 * 60);
 /// A reply comes within milliseconds while the headset is linked.
 const REPLY_WAIT: Duration = Duration::from_secs(3);
@@ -143,9 +148,7 @@ fn listener(c: HidColl) {
 
 pub fn poll(ctx: &mut PollContext) {
     for (vid, pid) in ctx.products(VID) {
-        if pid != DONGLE && pid != CABLE {
-            continue;
-        }
+        let Some(&(dongle, cable, name)) = MODELS.iter().find(|m| pid == m.0 || pid == m.1) else { continue };
         let Some(c) = ctx.find(vid, pid, |c| c.page() == 0xFF14 && c.in_len() == 64 && c.out_len() == 64).into_iter().next() else {
             continue;
         };
@@ -161,17 +164,17 @@ pub fn poll(ctx: &mut PollContext) {
         let (level, charging, silent) = with(pid, |s| (s.level, s.charging, s.silent));
         let mut st = DeviceStatus {
             key: format!("razer:{}", hex4(pid)),
-            name: "Razer BlackShark V3".into(),
+            name: name.into(),
             kind: DeviceKind::Headset,
-            via: if pid == CABLE { "USB cable" } else { "2.4 GHz dongle" }.into(),
+            via: if pid == cable { "USB cable" } else { "2.4 GHz dongle" }.into(),
             hw: Some((vid, pid)),
             grace_sec: 60,
             ..Default::default()
         };
         // Headset on the cable: the dongle's last level is stale. Hide it, and have the dongle ask
         // again once the cable is gone (the listener checks every few seconds).
-        let on_cable = pid == DONGLE && ctx.colls.iter().any(|c| c.vid == VID && c.pid == CABLE);
-        if pid == DONGLE {
+        let on_cable = pid == dongle && ctx.colls.iter().any(|c| c.vid == VID && c.pid == cable);
+        if pid == dongle {
             with(pid, |s| {
                 if on_cable {
                     // No queries meanwhile: the headset is not on the radio link.
@@ -187,7 +190,7 @@ pub fn poll(ctx: &mut PollContext) {
             Some(n) if !silent && !on_cable => {
                 st.percent = n;
                 // On the cable it charges from USB; the charging report is not always sent.
-                st.charging = charging || pid == CABLE;
+                st.charging = charging || pid == cable;
             }
             _ => st.connected = false,
         }
