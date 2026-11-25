@@ -374,6 +374,7 @@ pub fn poll_hardware(ids: &[(u16, u16)]) -> Vec<DeviceStatus> {
     drivers::endgame_4k::poll(&mut ctx);
     drivers::mchose_glw::poll(&mut ctx);
     drivers::mchose_g3::poll(&mut ctx);
+    drivers::aula_x5::poll(&mut ctx);
     drivers::ninjutso::poll(&mut ctx);
     drivers::ajazz_aj179::poll(&mut ctx);
     drivers::betop::poll(&mut ctx);
@@ -532,6 +533,7 @@ fn poll_with(colls: Vec<HidColl>) -> Vec<DeviceStatus> {
     drivers::endgame_4k::poll(&mut ctx);
     drivers::mchose_glw::poll(&mut ctx);
     drivers::mchose_g3::poll(&mut ctx);
+    drivers::aula_x5::poll(&mut ctx);
     drivers::ninjutso::poll(&mut ctx);
     drivers::ajazz_aj179::poll(&mut ctx);
     drivers::betop::poll(&mut ctx);

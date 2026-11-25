@@ -322,6 +322,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | AJAZZ AJ159P | Receiver `249A:5C2F` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an AJ179 V2 MAX on this receiver, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here on an AJ159P, [#216](../../issues/216)) |
 | IO Airox | Receiver `249A:5C2F`, shared with the AJAZZ AJ159P (vendor collection `FF01:0010` with the same 33-byte reports; protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#236](../../issues/236)) |
 | Ninjutso Sora V3 | Receiver `093A:EB02` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, and [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, verified on a Ninjutso Ten Air there; untested here on a Sora V3, [#198](../../issues/198)) |
+| AULA Kunlun X5 | Receiver `38A6:28F9` (protocol from [MouseDock](https://github.com/late-autumn-gif/mousedock), MIT, which lists this receiver, and [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0; untested here, [#194](../../issues/194)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -377,7 +378,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Bloody R72 Pro | — | No documented protocol; the documented Bloody protocol is for other models | [#211](../../issues/211) |
 | HyperX Pulsefire Haste 2 S | `03F0:0BB8` | No documented battery protocol for this mouse | [#201](../../issues/201) |
 | K68 keyboard (Ziyoulang) | `1EA7:0002` | No documented protocol | [#196](../../issues/196) |
-| AULA Kunlun X5 | `38A6:28F9` | Not among the documented AULA ids; commands are not guessed | [#194](../../issues/194) |
 | HATOR Rockfall 3 Wireless | `379A:0300` | No documented battery read for this keyboard's dongle; commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#221](../../issues/221) |
 | HELLYBERRY HM47 | `379A:A202` | No documented protocol for this `379A` receiver; commands are not guessed | [#220](../../issues/220) |
 | Corsair K63 Wireless | `1B1C:1B50` | No documented battery protocol for this keyboard's receiver; commands are not guessed | [#163](../../issues/163) |

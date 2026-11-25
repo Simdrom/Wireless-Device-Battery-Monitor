@@ -13,6 +13,7 @@ pub mod attackshark;
 pub mod aula;
 pub mod aula_hub;
 pub mod aula_mouse;
+pub mod aula_x5;
 pub mod barracuda_chroma;
 pub mod barracuda_x;
 pub mod betop;
