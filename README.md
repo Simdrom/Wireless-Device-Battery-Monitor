@@ -315,6 +315,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Logitech G325 LIGHTSPEED | Headset over its 2.4 GHz receiver `046D:0B21`, Centurion transport with the later models' frame prefix (protocol from [HeadsetControl](https://github.com/Sapd/HeadsetControl), GPL-3.0, [Solaar](https://github.com/pwr-Solaar/Solaar) and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#206](../../issues/206)) |
 | Machenike L7 Mix (L7 Arctic) | Receiver `248A:FF4C` or USB cable `248A:FF4E` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, tested on an L7 Arctic there; untested here, [#207](../../issues/207)) |
 | DAREU EK75 Pro | Receiver `260D:0042` or USB cable `260D:0046` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, after DAREU's web driver, cable verified there; untested here, [#63](../../issues/63)) |
+| IPI PIAO mouse | "PIAO-2.4G" receiver `372E:1014` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, after hardware captures and IPI's web driver; untested here, [#47](../../issues/47)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -364,7 +365,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | beyerdynamic MMX 200 Wireless | `2E50:002F` | No documented battery protocol for its dongle; its vendor channels are not guessed. Over Bluetooth it works when Windows shows the level. | [#40](../../issues/40) |
 | T87 keyboard | `056D:C077` | No documented protocol | [#44](../../issues/44) |
 | Keychron TurboLink 8K receiver | `3434:D05A` | Not among the documented Keychron receiver ids; which Launcher protocol it uses is not confirmed, so commands are not guessed | [#45](../../issues/45) |
-| PIAO-2.4G mouse | `372E:1014` | No documented protocol for this `372E` receiver | [#47](../../issues/47) |
 | AJAZZ NJ07 (Bluetooth LE) | — | Windows reads no battery level from it over Bluetooth; its 2.4 GHz dongle has not been reported yet | [#69](../../issues/69) |
 | VXE V1 (VGN Siren V1) headset | `10D6:0016` | The Actions-chip dongle's vendor channels are undocumented; no battery query is known. Over Bluetooth it works when Windows shows the level. | [#85](../../issues/85) |
 | AJAZZ AJ159P | `249A:5C2F` | No documented protocol for this receiver | [#216](../../issues/216) |
