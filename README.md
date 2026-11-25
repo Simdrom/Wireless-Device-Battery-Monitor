@@ -319,6 +319,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | MCHOSE X9 | Headset over its 2.4 GHz dongle `3837:6045` (protocol from [HeadsetControl](https://github.com/Sapd/HeadsetControl), GPL-3.0, after a capture of M HUB; no charging state; untested here, [#147](../../issues/147)) |
 | AJAZZ AK820 MAX, AULA F87 Pro V2C | On the SONiX receiver `0C45:FEFC` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an F87 Pro V2C on this receiver; no charging state; untested here on an AK820 MAX, [#160](../../issues/160)) |
 | BETOP BTP-KP70A controller | X-input dongle `20BC:5130` (protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after BETOP's client, and [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT; untested here, [#212](../../issues/212)) |
+| AJAZZ AJ159P | Receiver `249A:5C2F` (protocol from [HaloBattery](https://github.com/HeyOkay/HaloBattery), MIT, confirmed on an AJ179 V2 MAX on this receiver, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here on an AJ159P, [#216](../../issues/216)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -370,7 +371,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Keychron TurboLink 8K receiver | `3434:D05A` | Not among the documented Keychron receiver ids; which Launcher protocol it uses is not confirmed, so commands are not guessed | [#45](../../issues/45) |
 | AJAZZ NJ07 (Bluetooth LE) | — | Windows reads no battery level from it over Bluetooth; its 2.4 GHz dongle has not been reported yet | [#69](../../issues/69) |
 | VXE V1 (VGN Siren V1) headset | `10D6:0016` | The Actions-chip dongle's vendor channels are undocumented; no battery query is known. Over Bluetooth it works when Windows shows the level. | [#85](../../issues/85) |
-| AJAZZ AJ159P | `249A:5C2F` | No documented protocol for this receiver | [#216](../../issues/216) |
 | MCHOSE G11 headset | `3554:FD01` | No documented battery query for its dongle; commands are not guessed | [#213](../../issues/213) |
 | Bloody R72 Pro | — | No documented protocol; the documented Bloody protocol is for other models | [#211](../../issues/211) |
 | HyperX Pulsefire Haste 2 S | `03F0:0BB8` | No documented battery protocol for this mouse | [#201](../../issues/201) |

@@ -2,6 +2,7 @@
 //! APIs), talks to the devices it recognises and appends what it finds to the PollContext.
 pub mod airpods;
 pub mod ajazz_aj139;
+pub mod ajazz_aj179;
 pub mod areson;
 pub mod astro;
 pub mod astro_a50_gen4;
