@@ -13,12 +13,34 @@
 //!
 //! The reply is recognised by its echoed first three bytes. Read-only; no charging indication. Other
 //! keyboards on 05AC:024F (no FF60 collection on interface 3) are not touched.
+//!
+//! Dongles that TaskbarVitals (GPL-3.0, github.com/symNistaken/TaskbarVitals, src/drivers/sonix.cpp)
+//! lists for the same request, not confirmed on hardware there or here: 342D:E411 (#122).
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
+
 use crate::device::{DeviceKind, DeviceStatus, PollContext};
 use crate::hid::{self, HidColl, HidDev};
-use crate::util::{Deadline, hex4};
+use crate::util::hex4;
 
-const DONGLES: [(u16, u16); 3] = [(0x05AC, 0x024F), (0x0C45, 0xFEFE), (0x0C45, 0xFDFD)];
-const IFACE: i32 = 3;
+struct Dongle {
+    vid: u16,
+    pid: u16,
+    iface: i32,
+    /// Seen answering on hardware. The others share FF60:0061 with plain VIA firmware, which may
+    /// echo the request: an echo is no reading there, and a silent one is asked only now and then.
+    confirmed: bool,
+}
+
+const DONGLES: [Dongle; 4] = [
+    Dongle { vid: 0x05AC, pid: 0x024F, iface: 3, confirmed: true },
+    Dongle { vid: 0x0C45, pid: 0xFEFE, iface: 3, confirmed: true },
+    Dongle { vid: 0x0C45, pid: 0xFDFD, iface: 3, confirmed: true },
+    // Dark Project ALU87A Onionite (#122)
+    Dongle { vid: 0x342D, pid: 0xE411, iface: 1, confirmed: false },
+];
+const SILENT_QUERY_EVERY: Duration = Duration::from_secs(10 * 60);
 const LEN: usize = 32;
 const REPLY_MS: u64 = 500;
 
@@ -31,46 +53,58 @@ pub fn request() -> [u8; LEN + 1] {
     r
 }
 
+/// The request read back (VIA firmware without this command may echo it).
+pub fn is_echo(r: &[u8]) -> bool {
+    r == &request()[1..]
+}
+
 /// The level byte of a reply (report id 0 already stripped by the reader).
 pub fn parse(r: &[u8]) -> Option<u8> {
     (r.len() >= 4 && r[..3] == [0x20, 0x01, 0x00]).then(|| r[3])
 }
 
-fn query(d: &HidDev) -> Option<u8> {
-    d.flush();
-    if !d.write(&request()) {
-        return None;
-    }
-    let end = Deadline::in_ms(REPLY_MS);
-    while !end.passed() {
-        if let Some(l) = d.read(end.left_ms()).and_then(|r| parse(&r)) {
-            return Some(l);
-        }
-    }
-    None
+fn query(d: &HidDev, confirmed: bool) -> Option<u8> {
+    d.ask(&request(), REPLY_MS, |r| if !confirmed && is_echo(r) { None } else { parse(r) })
 }
 
-fn read(c: &HidColl) -> Option<u8> {
+fn read(c: &HidColl, confirmed: bool) -> Option<u8> {
     let d = HidDev::open(c)?;
     // The first request can go unanswered while the 2.4 GHz link wakes up.
-    query(&d).or_else(|| query(&d))
+    query(&d, confirmed).or_else(|| query(&d, confirmed))
 }
+
+static NEXT_TRY: Mutex<Option<HashMap<(u16, u16), Instant>>> = Mutex::new(None);
 
 fn name(c: &HidColl) -> String {
     let n = hid::product_string(c);
-    let n = n.trim().trim_end_matches(" 2.4G").trim();
+    let n = n.trim().trim_end_matches(" 2.4G").trim_end_matches("_2.4G").trim();
     if n.is_empty() || n.eq_ignore_ascii_case("usb dongle") || n.to_ascii_lowercase().ends_with("dongle") { "Wireless keyboard".into() } else { n.to_string() }
 }
 
 pub fn poll(ctx: &mut PollContext) {
-    for (vid, pid) in DONGLES {
+    for m in &DONGLES {
+        let (vid, pid, confirmed) = (m.vid, m.pid, m.confirmed);
         if ctx.is_claimed(vid, pid) {
             continue;
         }
         let colls = ctx.find(vid, pid, |c| {
-            c.iface == IFACE && c.page() == 0xFF60 && c.usage() == 0x0061 && c.out_len() as usize == LEN + 1 && c.in_len() as usize == LEN + 1
+            c.iface == m.iface && c.page() == 0xFF60 && c.usage() == 0x0061 && c.out_len() as usize == LEN + 1 && c.in_len() as usize == LEN + 1
         });
-        let Some((c, level)) = colls.iter().find_map(|c| read(c).map(|l| (c, l))) else { continue };
+        if colls.is_empty() {
+            continue;
+        }
+        let mut next = NEXT_TRY.lock().unwrap_or_else(|e| e.into_inner());
+        let next = next.get_or_insert_with(HashMap::new);
+        if next.get(&(vid, pid)).is_some_and(|t| Instant::now() < *t) {
+            continue;
+        }
+        let Some((c, level)) = colls.iter().find_map(|c| read(c, confirmed).map(|l| (c, l))) else {
+            if !confirmed {
+                next.insert((vid, pid), Instant::now() + SILENT_QUERY_EVERY);
+            }
+            continue;
+        };
+        next.remove(&(vid, pid));
         let base = DeviceStatus {
             key: format!("sonix:{}:{}", hex4(vid), hex4(pid)),
             name: name(c),
@@ -96,6 +130,15 @@ mod tests {
         assert_eq!(&r[..3], &[0x00, 0x20, 0x01]);
         assert_eq!(r[32], 0x21);
         assert!(r[3..32].iter().all(|&b| b == 0));
+    }
+
+    #[test]
+    fn echo() {
+        assert!(is_echo(&request()[1..]));
+        let mut r = request()[1..].to_vec();
+        r[3] = 73;
+        assert!(!is_echo(&r));
+        assert_eq!(parse(&r), Some(73));
     }
 
     #[test]

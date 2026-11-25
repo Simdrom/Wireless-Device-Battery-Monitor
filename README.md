@@ -307,6 +307,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | Dark Project Nexus | Receiver `3554:F53E` with the collections of the CompX receivers above (CompX report 8, as [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, sends it to every `3554` mouse receiver; untested here, [#52](../../issues/52)) |
 | "2.4G Wireless Receiver" mice (Areson) | Mice on `25A7:FA7C`, e.g. Redragon M693, Fantech Helios Go XD5 (the M913 receiver's read with the level in whole percent; protocol from [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT, and [redragon-mouse-linux](https://github.com/rajchauhan28/redragon-mouse-linux); untested here, [#225](../../issues/225)) |
 | Royal Kludge S98-ES | 2.4 GHz receiver `258A:0150` (the "BY" keyboards' battery read; protocol from [BrimDeck](https://github.com/MoFeng2223/BrimDeck), Apache-2.0, after GravaStar's 1khub; untested here, [#195](../../issues/195)) |
+| Dark Project ALU87A Onionite Wireless | 2.4 GHz dongle `342D:E411`, the SONiX dongles' battery read (listed by [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0; not confirmed on hardware there or here; a dongle that does not answer is not listed, [#122](../../issues/122)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -342,7 +343,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Mice on the AULA "BY" receiver | `3554:FA09` | Only AULA / MCHOSE keyboards answer on this receiver (those are supported) | [#17](../../issues/17) |
 | Sinowealth "Gaming Keyboard" | `258A:010C` | No documented protocol | [#19](../../issues/19) |
 | VGN Dragonfly 3 Pro | `391D:1A03` | No documented protocol for this receiver (not one of the Rongyuan-protocol VGN ids, and its vendor collections differ); V HUB's query is not known, so commands are not guessed. Over Bluetooth it works when Windows shows the level. | [#125](../../issues/125) |
-| Dark Project ALU87A Onionite Wireless ("ONIONITE87_2.4G") | `342D:E411` | No documented protocol for this dongle; its raw HID channel is not known to answer a battery query, so commands are not guessed | [#122](../../issues/122) |
 | Bloody R36 Ultra | `1956:3001` | The documented Bloody protocol does not answer on this mouse | [#24](../../issues/24) |
 | ThinkPad X1 Presenter Mouse, ProtoArc EM11 NL (Bluetooth) | Bluetooth | Windows reports no battery level for them over Bluetooth; their 2.4 GHz receivers are not identified yet | [#49](../../issues/49), [#50](../../issues/50) |
 | Glorious GHS Wireless InfinitePlay headset | `3794:D005` | No documented battery protocol for its dongle | [#54](../../issues/54) |
