@@ -314,6 +314,7 @@ The strip is a small layered window placed inside the taskbar, left of the notif
 | HyperX Cloud Stinger 2 Wireless | Over its 2.4 GHz dongle `03F0:0D93` (protocol from [HyperHeadset](https://github.com/LennardKittner/HyperHeadset), MIT, and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#203](../../issues/203)) |
 | Logitech G325 LIGHTSPEED | Headset over its 2.4 GHz receiver `046D:0B21`, Centurion transport with the later models' frame prefix (protocol from [HeadsetControl](https://github.com/Sapd/HeadsetControl), GPL-3.0, [Solaar](https://github.com/pwr-Solaar/Solaar) and [BatteryTray](https://github.com/qu1ncky/BatteryTray), MIT; untested here, [#206](../../issues/206)) |
 | Machenike L7 Mix (L7 Arctic) | Receiver `248A:FF4C` or USB cable `248A:FF4E` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, tested on an L7 Arctic there; untested here, [#207](../../issues/207)) |
+| DAREU EK75 Pro | Receiver `260D:0042` or USB cable `260D:0046` (protocol from [TaskbarVitals](https://github.com/symNistaken/TaskbarVitals), GPL-3.0, after DAREU's web driver, cable verified there; untested here, [#63](../../issues/63)) |
 | Sony | DualShock 4, DualSense, DualSense Edge (USB and Bluetooth) |
 | Apple | AirPods and Beats, from BLE proximity broadcasts (L / R / case) |
 | Bluetooth | Any device Windows knows a battery level for, plus the Google Fast Pair L / R / case split |
@@ -354,7 +355,6 @@ Devices that were requested but cannot be supported for now, and why. Most of th
 | Keychron Q6 HE (and other Keychron QMK keyboards on the cable) | `3434:0B60` | Keychron's stock firmware reports the battery only over Bluetooth (works there) | [#59](../../issues/59) |
 | Corsair Sabre v3 Pro Wireless (Slipstream V2 receiver) | `1B1C:2B42` | The only documented battery read ([OpenLinkHub](https://github.com/jurkovic-nikola/OpenLinkHub)) first logs in and switches the receiver to software mode, which takes over the mouse's onboard settings; BatteryHub only reads | [#98](../../issues/98) |
 | Keychron keyboards on the Keychron Link receiver (stock firmware), e.g. Q1 HE | `3434:D030` | Stock firmware reports the keyboard's battery over Bluetooth only, never through the receiver. Over Bluetooth it works. | [#61](../../issues/61) |
-| DAREU EK75 Pro | `260D:0042` | No documented protocol. Over Bluetooth it works when Windows shows the level. | [#63](../../issues/63) |
 | L90 headset (C-Media dongle) | `0D8C:0371` | The dongle has only audio and media keys, no vendor channel | [#64](../../issues/64) |
 | ONIKUMA GT808 headset | `3206:0861` | The dongle has only audio and media keys, no vendor channel. Over Bluetooth it works when Windows shows the level. | [#65](../../issues/65) |
 | "2.4G Wireless Device" mouse | `25A7:FA17` | No documented protocol (not the CompX / Areson layout used on other `25A7` receivers) | [#66](../../issues/66) |

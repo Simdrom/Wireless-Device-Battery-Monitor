@@ -20,6 +20,7 @@ pub mod compx;
 pub mod compx_extra;
 pub mod corsair;
 pub mod corsair_bragi;
+pub mod dareu;
 pub mod darmoshark;
 pub mod drivercore;
 pub mod endgame_4k;
