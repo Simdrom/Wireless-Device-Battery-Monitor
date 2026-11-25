@@ -48,6 +48,7 @@ pub mod mchose_g3;
 pub mod mchose_glw;
 pub mod mchose_modern;
 pub mod mchose_v9;
+pub mod mchose_x9;
 pub mod nzxt;
 pub mod piao;
 pub mod playstation;
